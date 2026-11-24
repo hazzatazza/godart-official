@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>goldenacres.io</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #231409;
+        }
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Lightweight HUD Layer (No heavy backdrop-filter blur for max FPS on older laptops) */
+        .hud-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+        }
+        .interactive {
+            pointer-events: auto;
+        }
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .hud-card {
+            background: rgba(18, 15, 13, 0.88);
+            border: 1px solid rgba(251, 191, 36, 0.28);
+            border-radius: 14px;
+            padding: 12px 16px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Left Stats Panel */
+        .stats-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 245px;
+        }
+        .brand-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 6px;
+        }
+        .game-brand {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .game-brand span.io-ext {
+            color: #fff;
+            background: rgba(245, 158, 11, 0.28);
+            border: 1px solid rgba(251, 191, 36, 0.45);
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+        .money-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 26px;
+            font-weight: 800;
+            color: #4ade80;
+        }
+        .status-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .combo-pill {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.45);
+            color: #fde047;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: none;
+        }
+        .overdrive-pill {
+            background: rgba(234, 88, 12, 0.35);
+            border: 1px solid #fbbf24;
+            color: #fef08a;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: none;
+        }
+        .crop-legend {
+            display: flex;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+        .legend-pill {
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .storage-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .storage-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+        .progress-track {
+            width: 100%;
+            height: 11px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            border-radius: 999px;
+            transition: width 0.12s ease-out;
+        }
+        .progress-fill.full {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+        .full-alert {
+            color: #fca5a5;
+            font-size: 12px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Center Field Progress Bar */
+        .field-progress-card {
+            min-width: 260px;
+            max-width: 380px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .level-tag {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+        .field-pct {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fbbf24;
+        }
+        .field-track {
+            width: 100%;
+            height: 13px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .field-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24, #4ade80);
+            border-radius: 999px;
+            transition: width 0.12s ease-out;
+        }
+        .field-sub {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
+        /* Right Upgrades Panel */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 260px;
+            width: 100%;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #fde68a;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .upgrade-list {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .upgrade-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 7px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 8px;
+        }
+        .upg-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .upg-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .upg-lvl {
+            font-size: 11px;
+            color: #cbd5e1;
+        }
+        .upg-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 8px;
+            padding: 7px 11px;
+            color: white;
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.12s ease;
+            min-width: 70px;
+        }
+        .upg-btn:hover:not(:disabled) {
+            transform: scale(1.04);
+            filter: brightness(1.08);
+        }
+        .upg-btn:disabled {
+            background: rgba(100, 116, 139, 0.35);
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Bottom Bar */
+        .bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 14px;
+        }
+        .controls-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .action-pill {
+            background: rgba(18, 15, 13, 0.88);
+            border: 1px solid rgba(251, 191, 36, 0.28);
+            color: #f8fafc;
+            padding: 9px 13px;
+            border-radius: 11px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-pill:hover {
+            background: rgba(251, 191, 36, 0.18);
+        }
+        .key-cap {
+            background: rgba(251, 191, 36, 0.24);
+            color: #fde68a;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: 800;
+            font-size: 11px;
+        }
+
+        /* Radar Minimap */
+        .minimap-wrap {
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+            background: rgba(18, 15, 13, 0.92);
+            border: 2px solid rgba(251, 191, 36, 0.38);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+        #minimap {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Floating Popups */
+        #popup-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 20;
+            overflow: hidden;
+        }
+        .float-popup {
+            position: absolute;
+            font-weight: 800;
+            font-size: 17px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+            animation: floatUp 0.85s ease-out forwards;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
+            30% { opacity: 1; transform: translate(-50%, -85%) scale(1.08); }
+            100% { opacity: 0; transform: translate(-50%, -140%) scale(0.95); }
+        }
+
+        /* Level Complete Modal */
+        #level-complete-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(15, 12, 10, 0.88);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+            padding: 20px;
+        }
+        #level-complete-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .complete-modal {
+            background: linear-gradient(145deg, #221c16, #14110e);
+            border: 1px solid rgba(251, 191, 36, 0.45);
+            border-radius: 22px;
+            padding: 30px 34px;
+            max-width: 430px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+            transform: translateY(18px) scale(0.96);
+            transition: transform 0.5s ease;
+        }
+        #level-complete-overlay.visible .complete-modal {
+            transform: translateY(0) scale(1);
+        }
+        .complete-badge {
+            display: inline-block;
+            background: rgba(251, 191, 36, 0.18);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            color: #fde047;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+        .complete-title {
+            font-size: 34px;
+            font-weight: 800;
+            color: #fef08a;
+            margin-bottom: 8px;
+        }
+        .complete-sub {
+            color: #cbd5e1;
+            font-size: 14px;
+            margin-bottom: 22px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .summary-box {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 8px;
+        }
+        .sum-val {
+            font-size: 18px;
+            font-weight: 800;
+            color: #4ade80;
+            display: block;
+        }
+        .sum-lbl {
+            font-size: 11px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            margin-top: 3px;
+            display: block;
+        }
+        .next-level-btn {
+            width: 100%;
+            padding: 14px 22px;
+            border-radius: 13px;
+            border: none;
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: #fff;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(234, 88, 12, 0.45);
+        }
+        .next-level-btn:hover {
+            filter: brightness(1.08);
+        }
+
+        /* Mobile Touch Pad */
+        .touch-pad {
+            display: none;
+            gap: 8px;
+        }
+        @media (max-width: 820px) {
+            .touch-pad { display: flex; }
+            .field-progress-card { order: 3; min-width: 100%; }
+            .right-column { max-width: 225px; }
+            .stats-panel { min-width: 205px; }
+        }
+        .touch-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(18, 15, 13, 0.85);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            color: white;
+            font-size: 19px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        .touch-btn:active {
+            background: rgba(251, 191, 36, 0.45);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div id="popup-container"></div>
+
+    <!-- Level Complete Overlay -->
+    <div id="level-complete-overlay">
+        <div class="complete-modal">
+            <div class="complete-badge" id="complete-badge">Level 1 • 100% Cleared</div>
+            <h1 class="complete-title">Level Complete!</h1>
+            <p class="complete-sub">Every acre is golden and clear. Ready for the next harvest?</p>
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <span class="sum-val" id="sum-crops" style="color: #fbbf24;">0</span>
+                    <span class="sum-lbl">Crops Cut</span>
+                </div>
+                <div class="summary-box">
+                    <span class="sum-val" id="sum-cash">$0</span>
+                    <span class="sum-lbl">Cash Earned</span>
+                </div>
+                <div class="summary-box">
+                    <span class="sum-val" id="sum-time" style="color: #38bdf8;">0:00</span>
+                    <span class="sum-lbl">Time Taken</span>
+                </div>
+            </div>
+            <button class="next-level-btn" id="next-level-btn" onclick="startNextLevel()">Start Level 2 ➔</button>
+        </div>
+    </div>
+
+    <div class="hud-layer">
+        <!-- Top Row -->
+        <div class="top-row">
+            <!-- Left: Branding, Cash, Combo & Hopper Tank -->
+            <div class="hud-card stats-panel interactive">
+                <div class="brand-row">
+                    <div class="game-brand">🌾 goldenacres<span class="io-ext">.io</span></div>
+                    <span style="font-size: 11px; color: #fde68a; font-weight: 700;">🌅 Golden Hour</span>
+                </div>
+                <div class="money-row">
+                    <span id="money-display">$0</span>
+                    <div class="crop-legend">
+                        <span class="legend-pill" title="Standard Crops"><span class="dot" style="background:#facc15"></span>$10</span>
+                        <span class="legend-pill" title="Golden Overdrive Crops ($50 + 6s Boost)"><span class="dot" style="background:#fef08a;"></span>$50</span>
+                    </div>
+                </div>
+                <div class="status-badges">
+                    <span class="combo-pill" id="combo-pill">🔥 1.0x Streak</span>
+                    <span class="overdrive-pill" id="overdrive-pill">⚡ GOLDEN BOOST 6.0s</span>
+                </div>
+                <div class="storage-container">
+                    <div class="storage-header">
+                        <span>Hopper Storage</span>
+                        <span id="storage-display">0 / 160</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="storage-bar"></div>
+                    </div>
+                    <div class="full-alert" id="full-alert">
+                        <span>⚠️ HOPPER FULL! Follow arrow to Sell Pad</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Field Completion Percentage Bar -->
+            <div class="hud-card field-progress-card interactive">
+                <div class="field-header">
+                    <span class="level-tag" id="level-tag">Level 1</span>
+                    <span class="field-pct" id="field-pct">0.0%</span>
+                </div>
+                <div class="field-track">
+                    <div class="field-fill" id="field-bar"></div>
+                </div>
+                <div class="field-sub">
+                    <span>Field Harvested</span>
+                    <span id="field-count">0 / 0 Crops</span>
+                </div>
+            </div>
+
+            <!-- Right: Gradual Vehicle Upgrades -->
+            <div class="right-column interactive">
+                <div class="hud-card">
+                    <div class="panel-header" onclick="toggleSection('upgrade-body')">
+                        <span>⚙️ Harvester Upgrades</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="upgrade-list" id="upgrade-body">
+                        <div class="upgrade-item">
+                            <div class="upg-info">
+                                <span class="upg-title">Engine Speed</span>
+                                <span class="upg-lvl" id="lbl-speed">Lvl 1 • +0% Speed</span>
+                            </div>
+                            <button class="upg-btn" id="btn-speed" onclick="buyUpgrade('speed')">$120</button>
+                        </div>
+                        <div class="upgrade-item">
+                            <div class="upg-info">
+                                <span class="upg-title">Cutter Width</span>
+                                <span class="upg-lvl" id="lbl-width">Lvl 1 • 5.6m Bar</span>
+                            </div>
+                            <button class="upg-btn" id="btn-width" onclick="buyUpgrade('width')">$150</button>
+                        </div>
+                        <div class="upgrade-item">
+                            <div class="upg-info">
+                                <span class="upg-title">Hopper Storage</span>
+                                <span class="upg-lvl" id="lbl-cargo">Lvl 1 • 160 Cap</span>
+                            </div>
+                            <button class="upg-btn" id="btn-cargo" onclick="buyUpgrade('cargo')">$100</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="bottom-row">
+            <div class="controls-bar interactive">
+                <button class="action-pill" onclick="toggleCamera()">
+                    <span class="key-cap">E</span> <span id="cam-label">Chase Cam</span>
+                </button>
+                <button class="action-pill" onclick="toggleQualityMode()" id="gfx-btn">
+                    ⚡ Quality: Ultra-Fast
+                </button>
+                <button class="action-pill" onclick="toggleAudio()" id="audio-btn">
+                    🔊 Sound On
+                </button>
+                <div class="action-pill" style="cursor: default;">
+                    <span class="key-cap">WASD</span> Drive
+                </div>
+            </div>
+
+            <!-- Mobile Touch Pad -->
+            <div class="touch-pad interactive">
+                <button class="touch-btn" id="t-left">◀</button>
+                <button class="touch-btn" id="t-right">▶</button>
+                <button class="touch-btn" id="t-down">▼</button>
+                <button class="touch-btn" id="t-up">▲</button>
+            </div>
+
+            <!-- Radar Minimap -->
+            <div class="minimap-wrap interactive">
+                <canvas id="minimap" width="118" height="118"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. SYNTHESIZED WEB AUDIO ENGINE
+        // ==========================================
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+                this.engineOsc = null;
+                this.engineGain = null;
+                this.initialized = false;
+                this.lastFreq = 0;
+                this.lastVol = 0;
+            }
+
+            init() {
+                if (this.initialized) return;
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+
+                    this.engineOsc = this.ctx.createOscillator();
+                    this.engineGain = this.ctx.createGain();
+                    const filter = this.ctx.createBiquadFilter();
+
+                    this.engineOsc.type = 'sawtooth';
+                    this.engineOsc.frequency.value = 36;
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 110;
+
+                    this.engineGain.gain.value = 0.0;
+                    this.engineOsc.connect(filter);
+                    filter.connect(this.engineGain);
+                    this.engineGain.connect(this.ctx.destination);
+                    this.engineOsc.start();
+                    this.initialized = true;
+                } catch (e) {
+                    console.warn('Web Audio unavailable');
+                }
+            }
+
+            updateEngine(speedRatio) {
+                if (!this.initialized || !this.ctx) return;
+                if (this.muted) {
+                    if (this.lastVol !== 0) {
+                        this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
+                        this.lastVol = 0;
+                    }
+                    return;
+                }
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                const absRatio = Math.abs(speedRatio);
+                const targetFreq = 35 + absRatio * 44;
+                const targetVol = 0.01 + absRatio * 0.025;
+                if (Math.abs(targetFreq - this.lastFreq) > 0.5) {
+                    this.engineOsc.frequency.setTargetAtTime(targetFreq, this.ctx.currentTime, 0.08);
+                    this.lastFreq = targetFreq;
+                }
+                if (Math.abs(targetVol - this.lastVol) > 0.002) {
+                    this.engineGain.gain.setTargetAtTime(targetVol, this.ctx.currentTime, 0.08);
+                    this.lastVol = targetVol;
+                }
+            }
+
+            playHarvestSnip() {
+                if (!this.initialized || this.muted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                const pitch = 290 + Math.random() * 170;
+                osc.frequency.setValueAtTime(pitch, now);
+                osc.frequency.exponentialRampToValueAtTime(pitch * 1.32, now + 0.05);
+
+                gain.gain.setValueAtTime(0.04, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.06);
+            }
+
+            playCashChime() {
+                if (!this.initialized || this.muted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const notes = [587.33, 880.00, 1174.66];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+                    gain.gain.setValueAtTime(0.1, now + idx * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.22);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.05);
+                    osc.stop(now + idx * 0.05 + 0.23);
+                });
+            }
+
+            playUpgradeSound() {
+                if (!this.initialized || this.muted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(340, now);
+                osc.frequency.exponentialRampToValueAtTime(740, now + 0.15);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.17);
+            }
+
+            playLevelComplete() {
+                if (!this.initialized || this.muted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const fanfare = [523.25, 659.25, 783.99, 1046.50];
+                fanfare.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    gain.gain.setValueAtTime(0.13, now + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.42);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + idx * 0.1 + 0.44);
+                });
+            }
+        }
+
+        const sound = new SoundEngine();
+        function toggleAudio() {
+            sound.init();
+            sound.muted = !sound.muted;
+            document.getElementById('audio-btn').innerText = sound.muted ? '🔇 Muted' : '🔊 Sound On';
+        }
+
+        // ==========================================
+        // 2. GAME STATE & BALANCED PROGRESSION
+        // ==========================================
+        const BASE_START_SPEED = 13.0;
+        const BASE_START_STORAGE = 160;
+        const BASE_START_WIDTH = 5.6;
+
+        const state = {
+            level: 1,
+            money: 0,
+            cargoCount: 0,
+            cargoValueBuffer: 0,
+            maxCargo: BASE_START_STORAGE,
+            maxSpeed: BASE_START_SPEED,
+            headerWidth: BASE_START_WIDTH,
+
+            speedLevel: 1,
+            widthLevel: 1,
+            cargoLevel: 1,
+
+            speedCost: 120,
+            widthCost: 150,
+            cargoCost: 100,
+
+            angledOverview: false,
+            unloadTimer: 0,
+            levelComplete: false,
+            levelStartTime: performance.now(),
+            levelCashEarned: 0,
+
+            crispQuality: false, // Defaults to Ultra-Fast (pixelRatio = 1, no shadow maps)
+            comboCount: 0,
+            comboTimer: 0,
+            overdriveTimer: 0
+        };
+
+        // ==========================================
+        // 3. THREE.JS SCENE (ZERO SHADOW MAP OVERHEAD)
+        // ==========================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf6ad55);
+        scene.fog = new THREE.FogExp2(0xed8936, 0.0036);
+
+        const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.5, 480);
+        const renderer = new THREE.WebGLRenderer({
+            antialias: false,
+            powerPreference: 'high-performance',
+            stencil: false
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(1); // Locked to 1 for ultra-fast performance on older laptops
+        renderer.shadowMap.enabled = false; // Completely disabled: uses fast baked ground contact shadows
+        container.appendChild(renderer.domElement);
+
+        window.toggleQualityMode = function() {
+            state.crispQuality = !state.crispQuality;
+            const dpr = state.crispQuality ? Math.min(window.devicePixelRatio || 1, 1.5) : 1;
+            renderer.setPixelRatio(dpr);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('gfx-btn').innerText = state.crispQuality ? '✨ Quality: Crisp' : '⚡ Quality: Ultra-Fast';
+        };
+
+        // Warm Golden-Hour Sunset Sky Dome
+        function buildGoldenHourSky() {
+            const skyGeo = new THREE.SphereGeometry(360, 24, 14);
+            const skyMat = new THREE.ShaderMaterial({
+                side: THREE.BackSide,
+                depthWrite: false,
+                uniforms: {
+                    topColor: { value: new THREE.Color(0x2b4c7e) },
+                    midColor: { value: new THREE.Color(0xf59e0b) },
+                    bottomColor: { value: new THREE.Color(0xfde68a) },
+                    sunDir: { value: new THREE.Vector3(0.45, 0.25, -0.85).normalize() }
+                },
+                vertexShader: `
+                    varying vec3 vWorldPos;
+                    void main() {
+                        vec4 wp = modelMatrix * vec4(position, 1.0);
+                        vWorldPos = wp.xyz;
+                        gl_Position = projectionMatrix * viewMatrix * wp;
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 topColor;
+                    uniform vec3 midColor;
+                    uniform vec3 bottomColor;
+                    uniform vec3 sunDir;
+                    varying vec3 vWorldPos;
+                    void main() {
+                        vec3 dir = normalize(vWorldPos);
+                        float h = clamp(dir.y, 0.0, 1.0);
+                        vec3 col = mix(bottomColor, midColor, smoothstep(0.0, 0.24, h));
+                        col = mix(col, topColor, smoothstep(0.22, 0.78, h));
+                        float sunAmt = max(dot(dir, sunDir), 0.0);
+                        col += vec3(1.0, 0.85, 0.45) * pow(sunAmt, 14.0) * 0.45;
+                        col += vec3(1.0, 0.96, 0.78) * smoothstep(0.9965, 0.9992, sunAmt) * 1.4;
+                        gl_FragColor = vec4(col, 1.0);
+                    }
+                `
+            });
+            scene.add(new THREE.Mesh(skyGeo, skyMat));
+        }
+        buildGoldenHourSky();
+
+        // Lightweight Two-Light Golden-Hour Setup
+        const hemiLight = new THREE.HemisphereLight(0xfffbeb, 0x5c3a21, 0.92);
+        scene.add(hemiLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffd584, 1.25);
+        sunLight.position.set(75, 58, -110);
+        scene.add(sunLight);
+
+        // Ground & Surrounding Pasture (MeshLambertMaterial for ultra-fast shading)
+        let fieldBounds = 88;
+        const outerGround = new THREE.Mesh(
+            new THREE.PlaneGeometry(720, 720),
+            new THREE.MeshLambertMaterial({ color: 0x4d6b1c })
+        );
+        outerGround.rotation.x = -Math.PI / 2;
+        outerGround.position.y = -0.05;
+        scene.add(outerGround);
+
+        const soilGround = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, 1),
+            new THREE.MeshLambertMaterial({ color: 0x4a311e })
+        );
+        soilGround.rotation.x = -Math.PI / 2;
+        scene.add(soilGround);
+
+        // ==========================================
+        // 4. BAKED CONTACT SHADOWS, FENCE & FARM HUB
+        // ==========================================
+        const contactShadowMat = new THREE.MeshBasicMaterial({
+            color: 0x1a0f08,
+            transparent: true,
+            opacity: 0.42,
+            depthWrite: false
+        });
+
+        let fenceGroup = null;
+        function rebuildPerimeterFence(bounds) {
+            if (fenceGroup) scene.remove(fenceGroup);
+            fenceGroup = new THREE.Group();
+
+            soilGround.scale.set(bounds * 2, bounds * 2, 1);
+
+            const postMat = new THREE.MeshLambertMaterial({ color: 0x5c3a21 });
+            const railMat = new THREE.MeshLambertMaterial({ color: 0x7c4d2b });
+            const postGeo = new THREE.BoxGeometry(0.45, 2.4, 0.45);
+            const railGeoX = new THREE.BoxGeometry(bounds * 2, 0.22, 0.16);
+            const railGeoZ = new THREE.BoxGeometry(0.16, 0.22, bounds * 2);
+
+            const step = 9.0;
+            const postPositions = [];
+            for (let i = -bounds; i <= bounds; i += step) {
+                postPositions.push([i, bounds], [i, -bounds], [bounds, i], [-bounds, i]);
+            }
+
+            const instPosts = new THREE.InstancedMesh(postGeo, postMat, postPositions.length);
+            const dummyObj = new THREE.Object3D();
+            postPositions.forEach(([px, pz], idx) => {
+                dummyObj.position.set(px, 1.2, pz);
+                dummyObj.updateMatrix();
+                instPosts.setMatrixAt(idx, dummyObj.matrix);
+            });
+            instPosts.instanceMatrix.needsUpdate = true;
+            fenceGroup.add(instPosts);
+
+            [0.8, 1.7].forEach(h => {
+                const rN = new THREE.Mesh(railGeoX, railMat); rN.position.set(0, h, -bounds);
+                const rS = new THREE.Mesh(railGeoX, railMat); rS.position.set(0, h, bounds);
+                const rE = new THREE.Mesh(railGeoZ, railMat); rE.position.set(bounds, h, 0);
+                const rW = new THREE.Mesh(railGeoZ, railMat); rW.position.set(-bounds, h, 0);
+                fenceGroup.add(rN, rS, rE, rW);
+            });
+
+            // Baked perimeter fence shadow strips
+            const shadowStripX = new THREE.PlaneGeometry(bounds * 2, 1.3);
+            const shadowStripZ = new THREE.PlaneGeometry(1.3, bounds * 2);
+            const sN = new THREE.Mesh(shadowStripX, contactShadowMat); sN.rotation.x = -Math.PI / 2; sN.position.set(0, 0.02, -bounds);
+            const sS = new THREE.Mesh(shadowStripX, contactShadowMat); sS.rotation.x = -Math.PI / 2; sS.position.set(0, 0.02, bounds);
+            const sE = new THREE.Mesh(shadowStripZ, contactShadowMat); sE.rotation.x = -Math.PI / 2; sE.position.set(bounds, 0.02, 0);
+            const sW = new THREE.Mesh(shadowStripZ, contactShadowMat); sW.rotation.x = -Math.PI / 2; sW.position.set(-bounds, 0.02, 0);
+            fenceGroup.add(sN, sS, sE, sW);
+
+            scene.add(fenceGroup);
+        }
+        rebuildPerimeterFence(fieldBounds);
+
+        // Classic Red Barn, Silo & Baked Ground Contact Shadows
+        const sellZoneCenter = new THREE.Vector3(0, 0, 0);
+        const SELL_RADIUS = 8.0;
+
+        function buildFarmHub() {
+            const hub = new THREE.Group();
+            hub.position.set(0, 0, -24);
+
+            const barnMat = new THREE.MeshLambertMaterial({ color: 0xb91c1c });
+            const trimMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+            const roofMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
+
+            // Baked Barn & Silo Contact Shadows
+            const barnShadow = new THREE.Mesh(new THREE.PlaneGeometry(15.2, 11.6), contactShadowMat);
+            barnShadow.rotation.x = -Math.PI / 2;
+            barnShadow.position.set(0.6, 0.03, 0.6);
+            hub.add(barnShadow);
+
+            const siloShadow = new THREE.Mesh(new THREE.CircleGeometry(3.6, 20), contactShadowMat);
+            siloShadow.rotation.x = -Math.PI / 2;
+            siloShadow.position.set(9.6, 0.03, -0.5);
+            hub.add(siloShadow);
+
+            const barnBody = new THREE.Mesh(new THREE.BoxGeometry(13, 7.5, 9.5), barnMat);
+            barnBody.position.y = 3.75;
+            hub.add(barnBody);
+
+            const roofGeo = new THREE.ConeGeometry(9.4, 4.8, 4);
+            roofGeo.rotateY(Math.PI / 4);
+            const roof = new THREE.Mesh(roofGeo, roofMat);
+            roof.scale.set(1.12, 1, 0.85);
+            roof.position.y = 9.8;
+            hub.add(roof);
+
+            const door = new THREE.Mesh(new THREE.BoxGeometry(4.4, 5.0, 0.3), trimMat);
+            door.position.set(0, 2.5, 4.8);
+            hub.add(door);
+
+            const beam1 = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.3, 0.36), barnMat);
+            beam1.position.set(0, 2.5, 4.82);
+            beam1.rotation.z = 0.72;
+            const beam2 = beam1.clone();
+            beam2.rotation.z = -0.72;
+            hub.add(beam1, beam2);
+
+            const siloMat = new THREE.MeshStandardMaterial({ color: 0xdbeafe, metalness: 0.6, roughness: 0.3 });
+            const silo = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 2.8, 15, 18), siloMat);
+            silo.position.set(9.2, 7.5, -1);
+            hub.add(silo);
+
+            const siloDome = new THREE.Mesh(new THREE.SphereGeometry(2.8, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), roofMat);
+            siloDome.position.set(9.2, 15, -1);
+            hub.add(siloDome);
+
+            scene.add(hub);
+        }
+        buildFarmHub();
+
+        // Central Golden Sell Pad at (0, 0)
+        const padGroup = new THREE.Group();
+        padGroup.position.copy(sellZoneCenter);
+
+        const padBase = new THREE.Mesh(
+            new THREE.CylinderGeometry(SELL_RADIUS, SELL_RADIUS + 0.35, 0.16, 36),
+            new THREE.MeshLambertMaterial({ color: 0x1c1917 })
+        );
+        padBase.position.y = 0.08;
+        padGroup.add(padBase);
+
+        const padRing = new THREE.Mesh(
+            new THREE.RingGeometry(SELL_RADIUS - 0.85, SELL_RADIUS - 0.1, 36),
+            new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide })
+        );
+        padRing.rotation.x = -Math.PI / 2;
+        padRing.position.y = 0.18;
+        padGroup.add(padRing);
+
+        const padInnerGlow = new THREE.Mesh(
+            new THREE.CircleGeometry(SELL_RADIUS - 0.85, 36),
+            new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.24 })
+        );
+        padInnerGlow.rotation.x = -Math.PI / 2;
+        padInnerGlow.position.y = 0.17;
+        padGroup.add(padInnerGlow);
+
+        const beaconRing = new THREE.Mesh(
+            new THREE.TorusGeometry(2.4, 0.12, 10, 32),
+            new THREE.MeshBasicMaterial({ color: 0xfbbf24 })
+        );
+        beaconRing.rotation.x = Math.PI / 2;
+        beaconRing.position.y = 5.4;
+        padGroup.add(beaconRing);
+
+        scene.add(padGroup);
+
+        // ==========================================
+        // 5. SLEEK MODERN COMBINE HARVESTER (WOBBLE-FREE WHEELS)
+        // ==========================================
+        const harvester = new THREE.Group();
+        harvester.position.set(0, 0, 12);
+
+        // Baked Ground Contact Shadow under Harvester
+        const harvesterShadow = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 7.2), contactShadowMat);
+        harvesterShadow.rotation.x = -Math.PI / 2;
+        harvesterShadow.position.set(0, 0.03, 0.2);
+        harvester.add(harvesterShadow);
+
+        const redPaint = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.32, roughness: 0.35 });
+        const charcoalMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
+        const silverMetal = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.75, roughness: 0.25 });
+        const goldAccent = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.5, roughness: 0.35 });
+        const glassMat = new THREE.MeshStandardMaterial({
+            color: 0x0f172a,
+            emissive: 0xf59e0b,
+            emissiveIntensity: 0.18,
+            transparent: true,
+            opacity: 0.76,
+            roughness: 0.12
+        });
+
+        // Lower Chassis
+        const lowerChassis = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.85, 5.8), charcoalMat);
+        lowerChassis.position.set(0, 0.95, 0);
+        harvester.add(lowerChassis);
+
+        // Main Hull
+        const mainHull = new THREE.Mesh(new THREE.BoxGeometry(3.1, 1.65, 4.2), redPaint);
+        mainHull.position.set(0, 2.05, 0.15);
+        harvester.add(mainHull);
+
+        // Angled Rear Engine Hood
+        const engineHood = new THREE.Mesh(new THREE.BoxGeometry(2.85, 1.35, 1.7), redPaint);
+        engineHood.position.set(0, 2.15, -2.35);
+        engineHood.rotation.x = -0.18;
+        harvester.add(engineHood);
+
+        const rearGrille = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.95, 0.12), charcoalMat);
+        rearGrille.position.set(0, 2.05, -3.18);
+        harvester.add(rearGrille);
+
+        // Gold Side Stripes
+        [-1.57, 1.57].forEach(sx => {
+            const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 4.1), goldAccent);
+            stripe.position.set(sx, 2.1, 0.15);
+            harvester.add(stripe);
+        });
+
+        // Expandable Grain Hopper Tank
+        const tankGroup = new THREE.Group();
+        tankGroup.position.set(0, 2.88, -0.35);
+
+        const hopperRim = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.95, 2.8), redPaint);
+        hopperRim.position.y = 0.48;
+        tankGroup.add(hopperRim);
+
+        const hopperInterior = new THREE.Mesh(new THREE.BoxGeometry(2.68, 0.92, 2.58), charcoalMat);
+        hopperInterior.position.y = 0.5;
+        tankGroup.add(hopperInterior);
+
+        // Visible Golden Grain Pile inside Hopper
+        const grainPile = new THREE.Mesh(
+            new THREE.BoxGeometry(2.62, 0.88, 2.52),
+            new THREE.MeshLambertMaterial({ color: 0xfacc15 })
+        );
+        grainPile.position.y = 0.46;
+        grainPile.scale.y = 0.04;
+        tankGroup.add(grainPile);
+        harvester.add(tankGroup);
+
+        // Folded Side Unloading Auger
+        const augerGroup = new THREE.Group();
+        augerGroup.position.set(-1.68, 3.05, -0.4);
+        const augerPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 4.2, 10).rotateX(Math.PI / 2), silverMetal);
+        augerPipe.position.z = -1.6;
+        const augerSpout = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.16, 0.45, 10), charcoalMat);
+        augerSpout.position.set(0, -0.18, -3.65);
+        augerSpout.rotation.x = 0.35;
+        augerGroup.add(augerPipe, augerSpout);
+        harvester.add(augerGroup);
+
+        // Exhaust Stack
+        const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.17, 1.55, 8), charcoalMat);
+        exhaust.position.set(1.2, 3.45, -2.2);
+        harvester.add(exhaust);
+
+        // Panoramic Tinted Cab
+        const cabGroup = new THREE.Group();
+        cabGroup.position.set(0, 3.15, 2.15);
+
+        const cabGlass = new THREE.Mesh(new THREE.BoxGeometry(2.45, 1.55, 1.75), glassMat);
+        cabGlass.rotation.x = 0.12;
+        cabGroup.add(cabGlass);
+
+        const cabRoof = new THREE.Mesh(new THREE.BoxGeometry(2.68, 0.22, 2.05), silverMetal);
+        cabRoof.position.set(0, 0.82, -0.05);
+        cabGroup.add(cabRoof);
+
+        const roofBeacon = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.16, 0.2, 0.26, 10),
+            new THREE.MeshBasicMaterial({ color: 0xfbbf24 })
+        );
+        roofBeacon.position.set(0, 1.05, -0.1);
+        cabGroup.add(roofBeacon);
+        harvester.add(cabGroup);
+
+        // Front Headlights
+        const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+        [-0.95, 0.95].forEach(lx => {
+            const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.12, 10).rotateX(Math.PI / 2), headlightMat);
+            hl.position.set(lx, 2.15, 2.28);
+            harvester.add(hl);
+        });
+
+        // Floating Return Arrow (shown when hopper is full)
+        const homeArrowGroup = new THREE.Group();
+        homeArrowGroup.position.set(0, 5.1, 0);
+        homeArrowGroup.visible = false;
+        const arrowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+        const arrowShaft = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.14, 1.05), arrowMat);
+        arrowShaft.position.z = -0.32;
+        const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.44, 0.72, 4).rotateX(Math.PI / 2), arrowMat);
+        arrowHead.position.z = 0.48;
+        homeArrowGroup.add(arrowShaft, arrowHead);
+        harvester.add(homeArrowGroup);
+
+        // Wobble-Free Heavy-Duty Wheels (Only rotate forward/backward on local X axle)
+        function createWheel(radius, width) {
+            const wGroup = new THREE.Group();
+            const tire = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius, radius, width, 20).rotateZ(Math.PI / 2),
+                new THREE.MeshLambertMaterial({ color: 0x171717 })
+            );
+            const rim = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.56, radius * 0.56, width + 0.04, 14).rotateZ(Math.PI / 2),
+                goldAccent
+            );
+            const hubCap = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.24, radius * 0.24, width + 0.08, 10).rotateZ(Math.PI / 2),
+                charcoalMat
+            );
+            wGroup.add(tire, rim, hubCap);
+            return wGroup;
+        }
+
+        const wheelFL = createWheel(1.02, 0.84); wheelFL.position.set(1.92, 1.02, 1.55);
+        const wheelFR = createWheel(1.02, 0.84); wheelFR.position.set(-1.92, 1.02, 1.55);
+        const wheelBL = createWheel(0.76, 0.68); wheelBL.position.set(1.78, 0.76, -1.85);
+        const wheelBR = createWheel(0.76, 0.68); wheelBR.position.set(-1.78, 0.76, -1.85);
+        harvester.add(wheelFL, wheelFR, wheelBL, wheelBR);
+
+        // Sleek Low-Profile Cutter Header at Front (NO big spinning reel)
+        const headerGroup = new THREE.Group();
+        headerGroup.position.set(0, 0.46, 3.3);
+
+        const headerShadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1.4), contactShadowMat);
+        headerShadow.rotation.x = -Math.PI / 2;
+        headerShadow.position.set(0, -0.43, 0.1);
+        headerGroup.add(headerShadow);
+
+        const feederHouse = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.65, 1.1), charcoalMat);
+        feederHouse.position.set(0, 0.35, -0.65);
+        feederHouse.rotation.x = 0.28;
+        headerGroup.add(feederHouse);
+
+        const deckBody = new THREE.Mesh(new THREE.BoxGeometry(1, 0.4, 1.0), redPaint);
+        headerGroup.add(deckBody);
+
+        const intakeChannel = new THREE.Mesh(new THREE.BoxGeometry(1, 0.22, 0.45), charcoalMat);
+        intakeChannel.position.set(0, 0.16, -0.18);
+        headerGroup.add(intakeChannel);
+
+        const cutterBlade = new THREE.Mesh(new THREE.BoxGeometry(1, 0.09, 0.34), silverMetal);
+        cutterBlade.position.set(0, -0.14, 0.56);
+        headerGroup.add(cutterBlade);
+
+        const bladeGlow = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 0.05, 0.08),
+            new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+        );
+        bladeGlow.position.set(0, -0.1, 0.72);
+        headerGroup.add(bladeGlow);
+
+        const sideShoeLeft = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.5, 1.32), charcoalMat);
+        const sideShoeRight = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.5, 1.32), charcoalMat);
+        headerGroup.add(sideShoeLeft, sideShoeRight);
+
+        harvester.add(headerGroup);
+        scene.add(harvester);
+
+        // ==========================================
+        // 6. GPU-INSTANCED MULTI-CROPS + O(1) SPATIAL GRID
+        // ==========================================
+        function mergeGeometries(geos) {
+            let totalVerts = 0;
+            geos.forEach(g => { totalVerts += g.attributes.position.count; });
+
+            const positions = new Float32Array(totalVerts * 3);
+            const normals = new Float32Array(totalVerts * 3);
+            let offset = 0;
+
+            geos.forEach(g => {
+                const pos = g.attributes.position.array;
+                const norm = g.attributes.normal.array;
+                positions.set(pos, offset * 3);
+                normals.set(norm, offset * 3);
+                offset += g.attributes.position.count;
+            });
+
+            const merged = new THREE.BufferGeometry();
+            merged.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            merged.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+            return merged;
+        }
+
+        // Low-poly optimized multi-crop geometries (crisp look, super low vertex count)
+        function createWheatGeometries() {
+            const stalkParts = [];
+            const headParts = [];
+            const offsets = [[0, 0, 1.0, 0], [-0.14, 0.1, 0.88, 0.12], [0.14, -0.08, 0.92, -0.1]];
+            offsets.forEach(([ox, oz, hScale, tilt]) => {
+                const stalk = new THREE.CylinderGeometry(0.035, 0.05, 1.35 * hScale, 3).toNonIndexed();
+                stalk.translate(0, 0.675 * hScale, 0);
+                stalk.rotateZ(tilt);
+                stalk.translate(ox, 0, oz);
+                stalkParts.push(stalk);
+
+                const ear = new THREE.OctahedronGeometry(0.16, 0).toNonIndexed();
+                ear.scale(0.85, 2.3, 0.85);
+                ear.translate(0, 1.48 * hScale, 0);
+                ear.rotateZ(tilt);
+                ear.translate(ox, 0, oz);
+                headParts.push(ear);
+            });
+            return { stemGeo: mergeGeometries(stalkParts), topGeo: mergeGeometries(headParts) };
+        }
+
+        function createCornGeometries() {
+            const stalkParts = [];
+            const cobParts = [];
+            const stalk = new THREE.CylinderGeometry(0.06, 0.085, 2.05, 4).toNonIndexed();
+            stalk.translate(0, 1.025, 0);
+            stalkParts.push(stalk);
+
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * Math.PI * 2) / 3 + 0.3;
+                const h = 0.72 + i * 0.36;
+                const leaf = new THREE.BoxGeometry(0.15, 0.025, 0.66).toNonIndexed();
+                leaf.translate(0, 0, 0.32);
+                leaf.rotateX(0.45);
+                leaf.rotateY(angle);
+                leaf.translate(0, h, 0);
+                stalkParts.push(leaf);
+            }
+
+            [0.2, Math.PI + 0.4].forEach((ang, idx) => {
+                const cob = new THREE.CylinderGeometry(0.09, 0.11, 0.42, 5).toNonIndexed();
+                cob.rotateZ(0.35);
+                cob.translate(0.16, 1.15 + idx * 0.25, 0);
+                cob.rotateY(ang);
+                cobParts.push(cob);
+            });
+            return { stemGeo: mergeGeometries(stalkParts), topGeo: mergeGeometries(cobParts) };
+        }
+
+        function createSunflowerGeometries() {
+            const stemAndCenter = [];
+            const petalParts = [];
+            const stalk = new THREE.CylinderGeometry(0.065, 0.08, 1.85, 4).toNonIndexed();
+            stalk.translate(0, 0.925, 0);
+            stemAndCenter.push(stalk);
+
+            const centerDisk = new THREE.CylinderGeometry(0.24, 0.24, 0.14, 6).toNonIndexed();
+            centerDisk.rotateX(Math.PI / 2 - 0.35);
+            centerDisk.translate(0, 1.88, 0.07);
+            stemAndCenter.push(centerDisk);
+
+            for (let p = 0; p < 6; p++) {
+                const a = (p / 6) * Math.PI * 2;
+                const petal = new THREE.BoxGeometry(0.16, 0.34, 0.04).toNonIndexed();
+                petal.translate(0, 0.28, 0);
+                petal.rotateZ(a);
+                petal.rotateX(-0.35);
+                petal.translate(0, 1.88, 0.07);
+                petalParts.push(petal);
+            }
+            return { stemGeo: mergeGeometries(stemAndCenter), topGeo: mergeGeometries(petalParts) };
+        }
+
+        const wheatMeshDef = createWheatGeometries();
+        const cornMeshDef = createCornGeometries();
+        const flowerMeshDef = createSunflowerGeometries();
+
+        const DENSE_SPACING = 1.5;
+        const MAX_INSTANCES_PER_TYPE = 18000;
+
+        const wheatStemMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+        const wheatTopMat  = new THREE.MeshLambertMaterial({ color: 0xfacc15 });
+        const cornStemMat  = new THREE.MeshLambertMaterial({ color: 0x15803d });
+        const cornTopMat   = new THREE.MeshLambertMaterial({ color: 0xfde047 });
+        const flowerStemMat = new THREE.MeshLambertMaterial({ color: 0x3f2305 });
+        const flowerTopMat  = new THREE.MeshLambertMaterial({ color: 0xfacc15 });
+        const goldenStemMat = new THREE.MeshLambertMaterial({ color: 0xf59e0b });
+        const goldenTopMat  = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+
+        const wheatStemsInst = new THREE.InstancedMesh(wheatMeshDef.stemGeo, wheatStemMat, MAX_INSTANCES_PER_TYPE);
+        const wheatTopsInst  = new THREE.InstancedMesh(wheatMeshDef.topGeo, wheatTopMat, MAX_INSTANCES_PER_TYPE);
+        const cornStemsInst  = new THREE.InstancedMesh(cornMeshDef.stemGeo, cornStemMat, MAX_INSTANCES_PER_TYPE);
+        const cornTopsInst   = new THREE.InstancedMesh(cornMeshDef.topGeo, cornTopMat, MAX_INSTANCES_PER_TYPE);
+        const flowerStemsInst = new THREE.InstancedMesh(flowerMeshDef.stemGeo, flowerStemMat, MAX_INSTANCES_PER_TYPE);
+        const flowerTopsInst  = new THREE.InstancedMesh(flowerMeshDef.topGeo, flowerTopMat, MAX_INSTANCES_PER_TYPE);
+        const goldenStemsInst = new THREE.InstancedMesh(flowerMeshDef.stemGeo, goldenStemMat, 160);
+        const goldenTopsInst  = new THREE.InstancedMesh(flowerMeshDef.topGeo, goldenTopMat, 160);
+
+        const allInstancedMeshes = [
+            wheatStemsInst, wheatTopsInst,
+            cornStemsInst, cornTopsInst,
+            flowerStemsInst, flowerTopsInst,
+            goldenStemsInst, goldenTopsInst
+        ];
+        allInstancedMeshes.forEach(inst => {
+            inst.frustumCulled = false; // Zero per-frame bounding-sphere frustum overhead
+            scene.add(inst);
+        });
+
+        // 2D Spatial Hash Grid (4x4 buckets) for O(1) instant harvesting collision!
+        const CELL_SIZE = 4.0;
+        let spatialBuckets = new Map();
+        let crops = [];
+        let totalLevelCrops = 0;
+        let harvestedLevelCrops = 0;
+        const dummy = new THREE.Object3D();
+
+        function getCellKey(cx, cz) {
+            return (cx + 512) * 1024 + (cz + 512);
+        }
+
+        function generateFieldForLevel(levelNum) {
+            fieldBounds = Math.min(124, 88 + (levelNum - 1) * 8);
+            rebuildPerimeterFence(fieldBounds);
+
+            crops = [];
+            spatialBuckets.clear();
+
+            let wheatIdx = 0;
+            let cornIdx = 0;
+            let flowerIdx = 0;
+            let goldenIdx = 0;
+
+            const rotAngle = (levelNum - 1) * 0.65;
+            const cosA = Math.cos(rotAngle);
+            const sinA = Math.sin(rotAngle);
+
+            for (let x = -fieldBounds + 3; x <= fieldBounds - 3; x += DENSE_SPACING) {
+                for (let z = -fieldBounds + 3; z <= fieldBounds - 3; z += DENSE_SPACING) {
+                    if (z < -11 && Math.abs(x) < 17) continue;
+                    if (Math.hypot(x, z) < SELL_RADIUS + 2.2) continue;
+                    if (Math.hypot(x, z - 12) < 5.5) continue;
+
+                    const px = x + (Math.random() - 0.5) * 0.28;
+                    const pz = z + (Math.random() - 0.5) * 0.28;
+                    const phase = Math.random() * Math.PI * 2;
+                    const scale = 0.88 + Math.random() * 0.24;
+
+                    const bandCoord = (px * cosA - pz * sinA) + Math.sin(pz * 0.08) * 10;
+                    const mod = ((Math.floor(bandCoord / 24) % 3) + 3) % 3;
+                    const isGolden = goldenIdx < 150 && Math.random() < 0.008;
+
+                    let type = 'wheat';
+                    let instIdx = 0;
+                    let burstColor = 0xfacc15;
+                    let cropValue = 10;
+
+                    if (isGolden) {
+                        type = 'golden';
+                        instIdx = goldenIdx++;
+                        burstColor = 0xfef08a;
+                        cropValue = 50;
+                        dummy.position.set(px, 0, pz);
+                        dummy.rotation.set(0, phase, 0);
+                        dummy.scale.set(1.25, 1.32, 1.25);
+                        dummy.updateMatrix();
+                        goldenStemsInst.setMatrixAt(instIdx, dummy.matrix);
+                        goldenTopsInst.setMatrixAt(instIdx, dummy.matrix);
+                    } else {
+                        dummy.position.set(px, 0, pz);
+                        dummy.rotation.set(0, phase, 0);
+                        dummy.scale.set(scale, scale, scale);
+                        dummy.updateMatrix();
+
+                        if (mod === 0 && wheatIdx < MAX_INSTANCES_PER_TYPE) {
+                            type = 'wheat';
+                            instIdx = wheatIdx++;
+                            burstColor = 0xfacc15;
+                            wheatStemsInst.setMatrixAt(instIdx, dummy.matrix);
+                            wheatTopsInst.setMatrixAt(instIdx, dummy.matrix);
+                        } else if (mod === 1 && cornIdx < MAX_INSTANCES_PER_TYPE) {
+                            type = 'corn';
+                            instIdx = cornIdx++;
+                            burstColor = 0x4ade80;
+                            cornStemsInst.setMatrixAt(instIdx, dummy.matrix);
+                            cornTopsInst.setMatrixAt(instIdx, dummy.matrix);
+                        } else if (flowerIdx < MAX_INSTANCES_PER_TYPE) {
+                            type = 'sunflower';
+                            instIdx = flowerIdx++;
+                            burstColor = 0xfde047;
+                            flowerStemsInst.setMatrixAt(instIdx, dummy.matrix);
+                            flowerTopsInst.setMatrixAt(instIdx, dummy.matrix);
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    const cropObj = { type, instIdx, x: px, z: pz, burstColor, cropValue, cut: false };
+                    crops.push(cropObj);
+
+                    const cx = Math.floor(px / CELL_SIZE);
+                    const cz = Math.floor(pz / CELL_SIZE);
+                    const key = getCellKey(cx, cz);
+                    let bucket = spatialBuckets.get(key);
+                    if (!bucket) {
+                        bucket = [];
+                        spatialBuckets.set(key, bucket);
+                    }
+                    bucket.push(cropObj);
+                }
+            }
+
+            wheatStemsInst.count = wheatIdx;
+            wheatTopsInst.count = wheatIdx;
+            cornStemsInst.count = cornIdx;
+            cornTopsInst.count = cornIdx;
+            flowerStemsInst.count = flowerIdx;
+            flowerTopsInst.count = flowerIdx;
+            goldenStemsInst.count = goldenIdx;
+            goldenTopsInst.count = goldenIdx;
+
+            allInstancedMeshes.forEach(inst => { inst.instanceMatrix.needsUpdate = true; });
+
+            totalLevelCrops = crops.length;
+            harvestedLevelCrops = 0;
+            buildMinimapCache();
+        }
+
+        // ==========================================
+        // 7. POOLED LIGHTWEIGHT PARTICLES & POPUPS
+        // ==========================================
+        const MAX_PARTICLES = 24;
+        const particlePool = [];
+        const particleGeo = new THREE.BoxGeometry(0.22, 0.22, 0.22);
+
+        for (let i = 0; i < MAX_PARTICLES; i++) {
+            const mesh = new THREE.Mesh(particleGeo, new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+            mesh.visible = false;
+            scene.add(mesh);
+            particlePool.push({ mesh, active: false, vx: 0, vy: 0, vz: 0, life: 0, decay: 0.04 });
+        }
+
+        function spawnBurst(x, y, z, color, count = 2, speed = 0.15) {
+            let spawned = 0;
+            for (let i = 0; i < MAX_PARTICLES && spawned < count; i++) {
+                const p = particlePool[i];
+                if (!p.active) {
+                    p.active = true;
+                    p.mesh.visible = true;
+                    p.mesh.position.set(x, y, z);
+                    p.mesh.material.color.setHex(color);
+                    p.mesh.scale.setScalar(1);
+                    p.vx = (Math.random() - 0.5) * speed * 2;
+                    p.vy = Math.random() * speed * 1.5 + 0.08;
+                    p.vz = (Math.random() - 0.5) * speed * 2;
+                    p.life = 1.0;
+                    p.decay = 0.04 + Math.random() * 0.02;
+                    spawned++;
+                }
+            }
+        }
+
+        const popupContainer = document.getElementById('popup-container');
+        function showFloatingText(worldPos, text, color = '#4ade80') {
+            const vec = worldPos.clone().project(camera);
+            if (vec.z > 1) return;
+            const sx = (vec.x * 0.5 + 0.5) * window.innerWidth;
+            const sy = (-(vec.y * 0.5) + 0.5) * window.innerHeight;
+
+            const el = document.createElement('div');
+            el.className = 'float-popup';
+            el.style.left = `${sx}px`;
+            el.style.top = `${sy}px`;
+            el.style.color = color;
+            el.innerText = text;
+            popupContainer.appendChild(el);
+            setTimeout(() => el.remove(), 850);
+        }
+
+        // ==========================================
+        // 8. GRADUAL UPGRADES & DIRTY-CHECKED HUD
+        // ==========================================
+        const domRefs = {
+            money: document.getElementById('money-display'),
+            storage: document.getElementById('storage-display'),
+            storageBar: document.getElementById('storage-bar'),
+            fullAlert: document.getElementById('full-alert'),
+            levelTag: document.getElementById('level-tag'),
+            fieldPct: document.getElementById('field-pct'),
+            fieldBar: document.getElementById('field-bar'),
+            fieldCount: document.getElementById('field-count'),
+            lblSpeed: document.getElementById('lbl-speed'),
+            btnSpeed: document.getElementById('btn-speed'),
+            lblWidth: document.getElementById('lbl-width'),
+            btnWidth: document.getElementById('btn-width'),
+            lblCargo: document.getElementById('lbl-cargo'),
+            btnCargo: document.getElementById('btn-cargo'),
+            comboPill: document.getElementById('combo-pill'),
+            overdrivePill: document.getElementById('overdrive-pill')
+        };
+
+        const hudCache = {};
+        function setTextCached(key, el, val) {
+            if (hudCache[key] !== val) {
+                el.innerText = val;
+                hudCache[key] = val;
+            }
+        }
+
+        function syncEquipmentVisuals() {
+            const w = state.headerWidth;
+            deckBody.scale.x = w;
+            headerShadow.scale.x = w + 0.3;
+            intakeChannel.scale.x = w * 0.72;
+            cutterBlade.scale.x = w + 0.15;
+            bladeGlow.scale.x = w + 0.15;
+
+            sideShoeLeft.position.set(w * 0.5 + 0.08, 0.02, 0.08);
+            sideShoeRight.position.set(-w * 0.5 - 0.08, 0.02, 0.08);
+
+            const tankScale = 1 + (state.cargoLevel - 1) * 0.035;
+            tankGroup.scale.set(Math.min(tankScale, 1.35), Math.min(tankScale, 1.4), Math.min(tankScale, 1.35));
+        }
+
+        function updateHUD() {
+            setTextCached('money', domRefs.money, `$${state.money.toLocaleString()}`);
+            setTextCached('storage', domRefs.storage, `${state.cargoCount} / ${state.maxCargo}`);
+
+            const tankPct = Math.min(100, (state.cargoCount / state.maxCargo) * 100);
+            const tankPctStr = `${tankPct.toFixed(1)}%`;
+            if (hudCache.tankPct !== tankPctStr) {
+                domRefs.storageBar.style.width = tankPctStr;
+                hudCache.tankPct = tankPctStr;
+            }
+
+            const isFull = state.cargoCount >= state.maxCargo;
+            if (hudCache.isFull !== isFull) {
+                domRefs.storageBar.classList.toggle('full', isFull);
+                domRefs.fullAlert.style.display = isFull ? 'flex' : 'none';
+                homeArrowGroup.visible = isFull;
+                hudCache.isFull = isFull;
+            }
+
+            grainPile.scale.y = Math.max(0.04, tankPct / 100);
+            grainPile.position.y = 0.04 + (grainPile.scale.y * 0.44);
+
+            const fieldPct = totalLevelCrops > 0 ? (harvestedLevelCrops / totalLevelCrops) * 100 : 0;
+            setTextCached('lvlTag', domRefs.levelTag, `Level ${state.level}`);
+            setTextCached('fieldPct', domRefs.fieldPct, `${fieldPct.toFixed(1)}%`);
+            const fieldPctStr = `${fieldPct.toFixed(2)}%`;
+            if (hudCache.fieldBar !== fieldPctStr) {
+                domRefs.fieldBar.style.width = fieldPctStr;
+                hudCache.fieldBar = fieldPctStr;
+            }
+            setTextCached('fieldCount', domRefs.fieldCount, `${harvestedLevelCrops.toLocaleString()} / ${totalLevelCrops.toLocaleString()} Crops`);
+
+            const speedBonusPct = Math.round(((state.maxSpeed / BASE_START_SPEED) - 1) * 100);
+            setTextCached('lblSpeed', domRefs.lblSpeed, `Lvl ${state.speedLevel} • +${speedBonusPct}% Speed`);
+            setTextCached('btnSpeed', domRefs.btnSpeed, `$${state.speedCost.toLocaleString()}`);
+            domRefs.btnSpeed.disabled = state.money < state.speedCost;
+
+            setTextCached('lblWidth', domRefs.lblWidth, `Lvl ${state.widthLevel} • ${state.headerWidth.toFixed(1)}m Bar`);
+            setTextCached('btnWidth', domRefs.btnWidth, `$${state.widthCost.toLocaleString()}`);
+            domRefs.btnWidth.disabled = state.money < state.widthCost;
+
+            setTextCached('lblCargo', domRefs.lblCargo, `Lvl ${state.cargoLevel} • ${state.maxCargo} Cap`);
+            setTextCached('btnCargo', domRefs.btnCargo, `$${state.cargoCost.toLocaleString()}`);
+            domRefs.btnCargo.disabled = state.money < state.cargoCost;
+
+            const showCombo = state.comboCount >= 5;
+            if (showCombo) {
+                const mult = (1 + Math.min(1.5, Math.floor(state.comboCount / 10) * 0.1)).toFixed(1);
+                domRefs.comboPill.style.display = 'inline-block';
+                setTextCached('comboTxt', domRefs.comboPill, `🔥 ${mult}x Streak (${state.comboCount})`);
+            } else if (hudCache.showCombo) {
+                domRefs.comboPill.style.display = 'none';
+            }
+            hudCache.showCombo = showCombo;
+
+            const showOD = state.overdriveTimer > 0;
+            if (showOD) {
+                domRefs.overdrivePill.style.display = 'inline-block';
+                setTextCached('odTxt', domRefs.overdrivePill, `⚡ GOLDEN BOOST ${state.overdriveTimer.toFixed(1)}s`);
+            } else if (hudCache.showOD) {
+                domRefs.overdrivePill.style.display = 'none';
+            }
+            hudCache.showOD = showOD;
+        }
+
+        window.buyUpgrade = function(type) {
+            sound.init();
+            if (type === 'speed' && state.money >= state.speedCost) {
+                state.money -= state.speedCost;
+                state.speedLevel++;
+                state.maxSpeed += 1.4;
+                state.speedCost = Math.round(state.speedCost * 1.45);
+                sound.playUpgradeSound();
+            } else if (type === 'width' && state.money >= state.widthCost) {
+                state.money -= state.widthCost;
+                state.widthLevel++;
+                state.headerWidth += 0.9;
+                state.widthCost = Math.round(state.widthCost * 1.5);
+                sound.playUpgradeSound();
+            } else if (type === 'cargo' && state.money >= state.cargoCost) {
+                state.money -= state.cargoCost;
+                state.cargoLevel++;
+                state.maxCargo += 75;
+                state.cargoCost = Math.round(state.cargoCost * 1.45);
+                sound.playUpgradeSound();
+            }
+            syncEquipmentVisuals();
+            updateHUD();
+        };
+
+        window.toggleSection = function(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'none' ? '' : 'none';
+        };
+
+        window.toggleCamera = function() {
+            state.angledOverview = !state.angledOverview;
+            document.getElementById('cam-label').innerText = state.angledOverview ? 'Angled Overview' : 'Chase Cam';
+        };
+
+        function triggerLevelComplete() {
+            if (state.levelComplete) return;
+            state.levelComplete = true;
+
+            if (state.cargoValueBuffer > 0) {
+                state.money += state.cargoValueBuffer;
+                state.levelCashEarned += state.cargoValueBuffer;
+                state.cargoCount = 0;
+                state.cargoValueBuffer = 0;
+                updateHUD();
+            }
+
+            sound.playLevelComplete();
+
+            const elapsedSec = Math.floor((performance.now() - state.levelStartTime) / 1000);
+            const mins = Math.floor(elapsedSec / 60);
+            const secs = String(elapsedSec % 60).padStart(2, '0');
+
+            document.getElementById('complete-badge').innerText = `Level ${state.level} • 100% Harvested`;
+            document.getElementById('sum-crops').innerText = totalLevelCrops.toLocaleString();
+            document.getElementById('sum-cash').innerText = `$${state.levelCashEarned.toLocaleString()}`;
+            document.getElementById('sum-time').innerText = `${mins}:${secs}`;
+            document.getElementById('next-level-btn').innerText = `Start Level ${state.level + 1} ➔`;
+
+            document.getElementById('level-complete-overlay').classList.add('visible');
+        }
+
+        window.startNextLevel = function() {
+            sound.init();
+            state.level++;
+            state.levelComplete = false;
+            state.cargoCount = 0;
+            state.cargoValueBuffer = 0;
+            state.levelCashEarned = 0;
+            state.comboCount = 0;
+            state.comboTimer = 0;
+            state.overdriveTimer = 0;
+            state.levelStartTime = performance.now();
+
+            harvester.position.set(0, 0, 12);
+            harvester.rotation.set(0, 0, 0);
+            velocity = 0;
+            steerAngle = 0;
+
+            generateFieldForLevel(state.level);
+            updateHUD();
+
+            document.getElementById('level-complete-overlay').classList.remove('visible');
+        };
+
+        // ==========================================
+        // 9. INPUT HANDLING
+        // ==========================================
+        const input = { forward: false, back: false, left: false, right: false };
+
+        window.addEventListener('keydown', (e) => {
+            sound.init();
+            const k = e.key.toLowerCase();
+            if (k === 'w' || e.key === 'ArrowUp') input.forward = true;
+            if (k === 's' || e.key === 'ArrowDown') input.back = true;
+            if (k === 'a' || e.key === 'ArrowLeft') input.left = true;
+            if (k === 'd' || e.key === 'ArrowRight') input.right = true;
+            if (k === 'e') toggleCamera();
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const k = e.key.toLowerCase();
+            if (k === 'w' || e.key === 'ArrowUp') input.forward = false;
+            if (k === 's' || e.key === 'ArrowDown') input.back = false;
+            if (k === 'a' || e.key === 'ArrowLeft') input.left = false;
+            if (k === 'd' || e.key === 'ArrowRight') input.right = false;
+        });
+
+        function bindTouch(id, prop) {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); sound.init(); input[prop] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); input[prop] = false; });
+        }
+        bindTouch('t-up', 'forward');
+        bindTouch('t-down', 'back');
+        bindTouch('t-left', 'left');
+        bindTouch('t-right', 'right');
+
+        // ==========================================
+        // 10. CACHED OFFSCREEN RADAR MINIMAP (10 FPS)
+        // ==========================================
+        const minimapCanvas = document.getElementById('minimap');
+        const mCtx = minimapCanvas.getContext('2d');
+        const miniCacheCanvas = document.createElement('canvas');
+        miniCacheCanvas.width = minimapCanvas.width;
+        miniCacheCanvas.height = minimapCanvas.height;
+        const mcCtx = miniCacheCanvas.getContext('2d');
+        let minimapDirty = true;
+
+        function buildMinimapCache() {
+            const w = miniCacheCanvas.width;
+            const h = miniCacheCanvas.height;
+            mcCtx.fillStyle = 'rgba(26, 21, 16, 0.96)';
+            mcCtx.fillRect(0, 0, w, h);
+
+            const mapToMini = (val) => ((val + fieldBounds) / (fieldBounds * 2)) * w;
+
+            for (let i = 0; i < crops.length; i += 4) {
+                const c = crops[i];
+                if (!c.cut) {
+                    mcCtx.fillStyle = c.type === 'wheat' ? '#facc15' : (c.type === 'corn' ? '#4ade80' : '#fb923c');
+                    mcCtx.fillRect(mapToMini(c.x), mapToMini(c.z), 2.2, 2.2);
+                }
+            }
+
+            for (let i = 0; i < crops.length; i++) {
+                const c = crops[i];
+                if (!c.cut && c.type === 'golden') {
+                    mcCtx.fillStyle = '#ffffff';
+                    mcCtx.beginPath();
+                    mcCtx.arc(mapToMini(c.x), mapToMini(c.z), 2.4, 0, Math.PI * 2);
+                    mcCtx.fill();
+                }
+            }
+
+            const sx = mapToMini(sellZoneCenter.x);
+            const sz = mapToMini(sellZoneCenter.z);
+            mcCtx.beginPath();
+            mcCtx.arc(sx, sz, 6, 0, Math.PI * 2);
+            mcCtx.fillStyle = '#fbbf24';
+            mcCtx.fill();
+            minimapDirty = false;
+        }
+
+        function drawMinimap() {
+            if (minimapDirty) buildMinimapCache();
+            const w = minimapCanvas.width;
+            mCtx.drawImage(miniCacheCanvas, 0, 0);
+
+            const mapToMini = (val) => ((val + fieldBounds) / (fieldBounds * 2)) * w;
+            const px = mapToMini(harvester.position.x);
+            const pz = mapToMini(harvester.position.z);
+
+            mCtx.save();
+            mCtx.translate(px, pz);
+            mCtx.rotate(-harvester.rotation.y);
+            mCtx.beginPath();
+            mCtx.moveTo(0, 6);
+            mCtx.lineTo(-4, -5);
+            mCtx.lineTo(4, -5);
+            mCtx.closePath();
+            mCtx.fillStyle = '#ef4444';
+            mCtx.fill();
+            mCtx.strokeStyle = '#ffffff';
+            mCtx.lineWidth = 1.2;
+            mCtx.stroke();
+            mCtx.restore();
+        }
+
+        // ==========================================
+        // 11. MAIN DELTA-TIME LOOP (60+ FPS)
+        // ==========================================
+        generateFieldForLevel(state.level);
+        syncEquipmentVisuals();
+        updateHUD();
+
+        let velocity = 0;
+        let steerAngle = 0;
+        const clock = new THREE.Clock();
+        const smoothCamPos = new THREE.Vector3(0, 8, -2);
+        const smoothLookAt = new THREE.Vector3(0, 1.8, 15);
+        const headerWorldPos = new THREE.Vector3();
+        let popCooldown = 0;
+        let minimapTimer = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.05);
+            const elapsed = clock.getElapsedTime();
+
+            if (!state.levelComplete) {
+                if (state.overdriveTimer > 0) {
+                    state.overdriveTimer = Math.max(0, state.overdriveTimer - dt);
+                    bladeGlow.material.color.setHex(0xffffff);
+                    if (state.overdriveTimer === 0) {
+                        bladeGlow.material.color.setHex(0xfacc15);
+                    }
+                    updateHUD();
+                }
+
+                if (state.comboTimer > 0) {
+                    state.comboTimer -= dt;
+                    if (state.comboTimer <= 0) {
+                        state.comboCount = 0;
+                        updateHUD();
+                    }
+                }
+
+                // Weighty, controllable frame-rate-independent driving
+                const effectiveMaxSpeed = state.overdriveTimer > 0 ? state.maxSpeed * 1.4 : state.maxSpeed;
+                const accelRate = 28.0;
+
+                if (input.forward) {
+                    velocity = Math.min(velocity + accelRate * dt, effectiveMaxSpeed);
+                } else if (input.back) {
+                    velocity = Math.max(velocity - accelRate * 1.1 * dt, -effectiveMaxSpeed * 0.45);
+                } else {
+                    velocity *= Math.pow(0.02, dt);
+                    if (Math.abs(velocity) < 0.08) velocity = 0;
+                }
+
+                const targetSteer = (input.left ? 1 : 0) - (input.right ? 1 : 0);
+                const steerLerp = 1 - Math.pow(0.0002, dt);
+                steerAngle += (targetSteer * 2.05 - steerAngle) * steerLerp;
+
+                if (Math.abs(velocity) > 0.2) {
+                    const reverseDir = velocity >= 0 ? 1 : -1;
+                    const speedFactor = Math.min(1, Math.abs(velocity) / 6.0);
+                    harvester.rotation.y += steerAngle * reverseDir * speedFactor * dt;
+                }
+
+                const sinH = Math.sin(harvester.rotation.y);
+                const cosH = Math.cos(harvester.rotation.y);
+                harvester.position.x += sinH * velocity * dt;
+                harvester.position.z += cosH * velocity * dt;
+
+                const limit = fieldBounds - 3.2;
+                harvester.position.x = THREE.MathUtils.clamp(harvester.position.x, -limit, limit);
+                harvester.position.z = THREE.MathUtils.clamp(harvester.position.z, -limit, limit);
+
+                // Wobble-free forward/backward wheel rotation ONLY
+                const wheelSpinFront = velocity * dt * 1.05;
+                const wheelSpinRear = velocity * dt * 1.38;
+                wheelFL.rotation.x += wheelSpinFront;
+                wheelFR.rotation.x += wheelSpinFront;
+                wheelBL.rotation.x += wheelSpinRear;
+                wheelBR.rotation.x += wheelSpinRear;
+
+                if (homeArrowGroup.visible) {
+                    const dx = sellZoneCenter.x - harvester.position.x;
+                    const dz = sellZoneCenter.z - harvester.position.z;
+                    homeArrowGroup.rotation.y = Math.atan2(dx, dz) - harvester.rotation.y;
+                    homeArrowGroup.position.y = 5.1 + Math.sin(elapsed * 5) * 0.22;
+                }
+
+                sound.updateEngine(velocity / effectiveMaxSpeed);
+
+                // --- O(1) Spatial-Bucket Collision & Harvesting ---
+                if (state.cargoCount < state.maxCargo) {
+                    headerGroup.getWorldPosition(headerWorldPos);
+                    const halfW = state.headerWidth * 0.52;
+                    const harvestDistSq = halfW * halfW;
+
+                    const minCellX = Math.floor((headerWorldPos.x - halfW) / CELL_SIZE);
+                    const maxCellX = Math.floor((headerWorldPos.x + halfW) / CELL_SIZE);
+                    const minCellZ = Math.floor((headerWorldPos.z - halfW) / CELL_SIZE);
+                    const maxCellZ = Math.floor((headerWorldPos.z + halfW) / CELL_SIZE);
+
+                    let wheatDirty = false;
+                    let cornDirty = false;
+                    let flowerDirty = false;
+                    let goldenDirty = false;
+                    let harvestedThisFrame = 0;
+                    let hitGolden = false;
+
+                    for (let cx = minCellX; cx <= maxCellX; cx++) {
+                        for (let cz = minCellZ; cz <= maxCellZ; cz++) {
+                            const bucket = spatialBuckets.get(getCellKey(cx, cz));
+                            if (!bucket) continue;
+
+                            for (let i = 0; i < bucket.length; i++) {
+                                const c = bucket[i];
+                                if (c.cut) continue;
+
+                                const dx = headerWorldPos.x - c.x;
+                                const dz = headerWorldPos.z - c.z;
+                                if (dx * dx + dz * dz < harvestDistSq) {
+                                    c.cut = true;
+                                    state.cargoCount++;
+                                    state.cargoValueBuffer += c.cropValue;
+                                    harvestedLevelCrops++;
+                                    harvestedThisFrame++;
+
+                                    state.comboCount++;
+                                    state.comboTimer = 2.4;
+
+                                    dummy.position.set(c.x, -10, c.z);
+                                    dummy.scale.set(0, 0, 0);
+                                    dummy.updateMatrix();
+
+                                    if (c.type === 'wheat') {
+                                        wheatStemsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        wheatTopsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        wheatDirty = true;
+                                    } else if (c.type === 'corn') {
+                                        cornStemsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        cornTopsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        cornDirty = true;
+                                    } else if (c.type === 'sunflower') {
+                                        flowerStemsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        flowerTopsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        flowerDirty = true;
+                                    } else if (c.type === 'golden') {
+                                        goldenStemsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        goldenTopsInst.setMatrixAt(c.instIdx, dummy.matrix);
+                                        goldenDirty = true;
+                                        hitGolden = true;
+                                        state.overdriveTimer = 6.0;
+                                    }
+
+                                    if (harvestedThisFrame <= 2) {
+                                        spawnBurst(c.x, 1.1, c.z, c.burstColor, 2, 0.14);
+                                    }
+
+                                    if (state.cargoCount >= state.maxCargo) break;
+                                }
+                            }
+                            if (state.cargoCount >= state.maxCargo) break;
+                        }
+                        if (state.cargoCount >= state.maxCargo) break;
+                    }
+
+                    if (wheatDirty) {
+                        wheatStemsInst.instanceMatrix.needsUpdate = true;
+                        wheatTopsInst.instanceMatrix.needsUpdate = true;
+                    }
+                    if (cornDirty) {
+                        cornStemsInst.instanceMatrix.needsUpdate = true;
+                        cornTopsInst.instanceMatrix.needsUpdate = true;
+                    }
+                    if (flowerDirty) {
+                        flowerStemsInst.instanceMatrix.needsUpdate = true;
+                        flowerTopsInst.instanceMatrix.needsUpdate = true;
+                    }
+                    if (goldenDirty) {
+                        goldenStemsInst.instanceMatrix.needsUpdate = true;
+                        goldenTopsInst.instanceMatrix.needsUpdate = true;
+                    }
+
+                    if (hitGolden) {
+                        sound.playUpgradeSound();
+                        showFloatingText(harvester.position.clone().add(new THREE.Vector3(0, 4.6, 0)), '⚡ GOLDEN BOOST! +$50', '#fde047');
+                    }
+
+                    if (harvestedThisFrame > 0) {
+                        minimapDirty = true;
+                        updateHUD();
+                        popCooldown -= dt;
+                        if (popCooldown <= 0) {
+                            sound.playHarvestSnip();
+                            popCooldown = 0.065;
+                        }
+                        if (harvestedLevelCrops >= totalLevelCrops) {
+                            triggerLevelComplete();
+                        }
+                    }
+                }
+
+                // --- Central Sell Pad Unloading with Combo Streak Multiplier ---
+                const distToPadSq = harvester.position.x * harvester.position.x + harvester.position.z * harvester.position.z;
+                if (distToPadSq < SELL_RADIUS * SELL_RADIUS && state.cargoCount > 0) {
+                    state.unloadTimer += dt;
+                    padRing.material.color.setHex(0x4ade80);
+
+                    if (state.unloadTimer >= 0.035) {
+                        state.unloadTimer = 0;
+                        const batchCount = Math.min(state.cargoCount, Math.max(1, Math.ceil(state.maxCargo / 22)));
+                        const avgUnitVal = state.cargoValueBuffer / state.cargoCount;
+                        const baseBatchVal = Math.round(batchCount * avgUnitVal);
+                        const streakMult = 1 + Math.min(1.5, Math.floor(state.comboCount / 10) * 0.1);
+                        const earned = Math.round(baseBatchVal * streakMult);
+
+                        state.cargoCount -= batchCount;
+                        state.cargoValueBuffer = Math.max(0, state.cargoValueBuffer - baseBatchVal);
+                        state.money += earned;
+                        state.levelCashEarned += earned;
+
+                        spawnBurst(harvester.position.x - 1.5, 3.0, harvester.position.z, 0xfacc15, 2, 0.2);
+
+                        if (state.cargoCount === 0 || Math.random() < 0.26) {
+                            sound.playCashChime();
+                            const bonusTag = streakMult > 1.0 ? ` (${streakMult.toFixed(1)}x!)` : '';
+                            showFloatingText(harvester.position.clone().add(new THREE.Vector3(0, 4.4, 0)), `+$${earned}${bonusTag}`, '#4ade80');
+                        }
+                        updateHUD();
+                    }
+                } else {
+                    padRing.material.color.setHex(0xfacc15);
+                }
+            } else {
+                sound.updateEngine(0);
+            }
+
+            // --- Smooth Camera (Chase Cam vs ~48° Angled High-Altitude Overview) ---
+            const camLerp = 1 - Math.pow(0.0006, dt);
+            const lookLerp = 1 - Math.pow(0.00006, dt);
+
+            if (state.angledOverview) {
+                const targetPos = new THREE.Vector3(
+                    harvester.position.x,
+                    27,
+                    harvester.position.z - 24
+                );
+                smoothCamPos.lerp(targetPos, camLerp);
+                camera.position.copy(smoothCamPos);
+
+                const lookTarget = new THREE.Vector3(
+                    harvester.position.x,
+                    1.2,
+                    harvester.position.z + 4
+                );
+                smoothLookAt.lerp(lookTarget, lookLerp);
+                camera.lookAt(smoothLookAt);
+                if (Math.abs(camera.fov - 54) > 0.05) {
+                    camera.fov += (54 - camera.fov) * camLerp;
+                    camera.updateProjectionMatrix();
+                }
+            } else {
+                const behindDist = 14.5;
+                const targetPos = new THREE.Vector3(
+                    harvester.position.x - Math.sin(harvester.rotation.y) * behindDist,
+                    harvester.position.y + 7.2,
+                    harvester.position.z - Math.cos(harvester.rotation.y) * behindDist
+                );
+                smoothCamPos.lerp(targetPos, camLerp);
+                camera.position.copy(smoothCamPos);
+
+                const lookTarget = new THREE.Vector3(
+                    harvester.position.x + Math.sin(harvester.rotation.y) * 3.2,
+                    harvester.position.y + 1.8,
+                    harvester.position.z + Math.cos(harvester.rotation.y) * 3.2
+                );
+                smoothLookAt.lerp(lookTarget, lookLerp);
+                camera.lookAt(smoothLookAt);
+
+                const targetFov = 56 + (Math.abs(velocity) / 34) * 7;
+                if (Math.abs(camera.fov - targetFov) > 0.05) {
+                    camera.fov += (targetFov - camera.fov) * camLerp;
+                    camera.updateProjectionMatrix();
+                }
+            }
+
+            beaconRing.rotation.z = elapsed * 1.5;
+            beaconRing.position.y = 5.2 + Math.sin(elapsed * 3) * 0.4;
+
+            // Update pooled particles
+            for (let i = 0; i < MAX_PARTICLES; i++) {
+                const p = particlePool[i];
+                if (!p.active) continue;
+                p.mesh.position.x += p.vx * dt * 60;
+                p.mesh.position.y += p.vy * dt * 60;
+                p.mesh.position.z += p.vz * dt * 60;
+                p.vy -= 0.48 * dt;
+                p.life -= p.decay * dt * 60;
+                if (p.life <= 0) {
+                    p.active = false;
+                    p.mesh.visible = false;
+                } else {
+                    p.mesh.scale.setScalar(p.life);
+                }
+            }
+
+            // Throttled 10 FPS Minimap Redraw
+            minimapTimer += dt;
+            if (minimapTimer >= 0.1) {
+                minimapTimer = 0;
+                drawMinimap();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        window.onload = function () {
+            animate();
+        };
+        if (document.readyState === 'complete') {
+            animate();
+        }
+    </script>
+</body>
+</html>
