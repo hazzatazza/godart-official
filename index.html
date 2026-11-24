@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>godart</title>
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-bg-hover: rgba(255, 255, 255, 0.13);
+      --glass-bg-elevated: rgba(24, 16, 36, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --glass-border-strong: rgba(255, 255, 255, 0.28);
+      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+      --text-primary: rgba(255, 255, 255, 0.96);
+      --text-secondary: rgba(255, 255, 255, 0.68);
+      --text-tertiary: rgba(255, 255, 255, 0.45);
+      --plum: #b47cff;
+      --mint: #4ade80;
+      --emerald: #10b981;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-pill: 9999px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-primary);
+      min-height: 100vh;
+      background-color: #0e0916;
+      background-image:
+        radial-gradient(1100px 760px at 12% 8%, rgba(126, 58, 242, 0.42), transparent 62%),
+        radial-gradient(960px 720px at 88% 14%, rgba(16, 185, 129, 0.34), transparent 60%),
+        radial-gradient(900px 760px at 78% 88%, rgba(139, 92, 246, 0.30), transparent 62%),
+        radial-gradient(840px 680px at 18% 90%, rgba(5, 150, 105, 0.28), transparent 60%),
+        linear-gradient(160deg, #130b20 0%, #0d1615 52%, #110b1c 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    /* Subtle tactile grain */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.032;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(42px) saturate(190%);
+      -webkit-backdrop-filter: blur(42px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-highlight), 0 18px 44px rgba(0, 0, 0, 0.28);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.075);
+      backdrop-filter: blur(36px) saturate(185%);
+      -webkit-backdrop-filter: blur(36px) saturate(185%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-highlight), 0 12px 32px rgba(0, 0, 0, 0.22);
+      border-radius: var(--radius-lg);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.24s ease, border-color 0.24s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.115);
+      border-color: var(--glass-border-strong);
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 22px 20px 72px;
+    }
+
+    /* Top visionOS Floating Bar */
+    .topbar {
+      position: sticky;
+      top: 16px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 14px 10px 20px;
+      border-radius: var(--radius-pill);
+      background: rgba(22, 15, 34, 0.56);
+      backdrop-filter: blur(44px) saturate(200%);
+      -webkit-backdrop-filter: blur(44px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 14px 36px rgba(0, 0, 0, 0.32);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c084fc 0%, #4ade80 100%);
+      box-shadow: 0 0 14px rgba(74, 222, 128, 0.55);
+    }
+
+    .nav-pills {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .nav-pill {
+      appearance: none;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .nav-pill:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-pill.active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.24);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    /* Views */
+    .view {
+      display: none;
+      margin-top: 28px;
+      animation: viewFade 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes viewFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      font-size: clamp(28px, 4vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+    }
+
+    .page-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    /* Hero Spotlight */
+    .hero-panel {
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 28px;
+      align-items: center;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #a7f3d0;
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(74, 222, 128, 0.28);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 14px;
+    }
+
+    .hero-panel h1 {
+      font-size: clamp(32px, 4.5vw, 46px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+      margin-bottom: 12px;
+    }
+
+    .hero-panel p {
+      font-size: 16px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      max-width: 52ch;
+      margin-bottom: 22px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.65), rgba(16, 185, 129, 0.65));
+      border-color: rgba(255, 255, 255, 0.34);
+    }
+
+    .btn-accent:hover {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.82), rgba(16, 185, 129, 0.82));
+    }
+
+    .hero-art {
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, rgba(168, 85, 247, 0.24), rgba(16, 185, 129, 0.22));
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Grids */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .card-art {
+      height: 150px;
+      border-radius: 16px;
+      margin: 10px 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #d8b4fe;
+      background: rgba(168, 85, 247, 0.18);
+      border: 1px solid rgba(192, 132, 252, 0.25);
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 8px;
+    }
+
+    .tag.mint {
+      color: #a7f3d0;
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(74, 222, 128, 0.28);
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      margin-bottom: 5px;
+    }
+
+    .card-desc {
+      font-size: 13.5px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    /* Games Controls Bar */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      background: rgba(0, 0, 0, 0.24);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: var(--radius-pill);
+      padding: 8px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13.5px;
+      min-width: 220px;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .search-input:focus {
+      border-color: rgba(192, 132, 252, 0.55);
+    }
+
+    .repo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+    }
+
+    .repo-pill:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    /* About Box */
+    .about-card {
+      max-width: 720px;
+      padding: 32px;
+      border-radius: var(--radius-xl);
+    }
+
+    .about-card p {
+      font-size: 16.5px;
+      line-height: 1.65;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .about-card p:last-child {
+      margin-bottom: 0;
+      color: #a7f3d0;
+      font-weight: 600;
+    }
+
+    /* Glass Window Modal for Playing Games */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(7, 5, 12, 0.68);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .window-frame {
+      width: 100%;
+      max-width: 980px;
+      height: 82vh;
+      border-radius: 24px;
+      background: rgba(22, 16, 33, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 30px 70px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .traffic-lights {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tl {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+
+    .tl-close { background: #ff5f57; }
+    .tl-min { background: #febc2e; }
+    .tl-max { background: #28c840; }
+
+    .window-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .window-iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: #0d0914;
+    }
+
+    .status-banner {
+      padding: 28px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .status-banner code {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 2px 7px;
+      border-radius: 6px;
+      color: #a7f3d0;
+      font-size: 13px;
+    }
+
+    @media (max-width: 780px) {
+      .hero-panel {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+      .topbar {
+        border-radius: 22px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .nav-pills {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- Floating Glass Navigation -->
+    <header class="topbar">
+      <a class="brand" href="#overview" data-route="overview">
+        <span class="brand-dot"></span>
+        <span>godart</span>
+      </a>
+      <nav class="nav-pills" aria-label="Primary Navigation">
+        <button class="nav-pill active" data-route="overview">Overview</button>
+        <button class="nav-pill" data-route="games">Games</button>
+        <button class="nav-pill" data-route="characters">Characters</button>
+        <button class="nav-pill" data-route="tv-movies">TV &amp; Movies</button>
+        <button class="nav-pill" data-route="books">Books</button>
+        <button class="nav-pill" data-route="about">About</button>
+      </nav>
+    </header>
+
+    <!-- OVERVIEW PAGE -->
+    <main id="view-overview" class="view active">
+      <section class="hero-panel glass">
+        <div>
+          <span class="eyebrow">Godart Studios &bull; Balonie Books</span>
+          <h1>Games, worlds, stories, and characters.</h1>
+          <p>Explore original browser games from the repository, meet the cast, browse upcoming screen projects, and read stories from Balonie Books.</p>
+          <div class="btn-row">
+            <button class="btn btn-accent" data-route="games">Open Games Folder</button>
+            <button class="btn" data-route="characters">Meet Characters</button>
+            <button class="btn" data-route="books">Balonie Books</button>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg width="190" height="150" viewBox="0 0 190 150" fill="none">
+            <circle cx="72" cy="75" r="46" fill="url(#g1)" fill-opacity="0.85"/>
+            <rect x="86" y="38" width="68" height="68" rx="22" fill="url(#g2)" fill-opacity="0.82" stroke="rgba(255,255,255,0.45)"/>
+            <circle cx="120" cy="72" r="14" fill="rgba(255,255,255,0.85)"/>
+            <defs>
+              <linearGradient id="g1" x1="26" y1="29" x2="118" y2="121" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#C084FC"/>
+                <stop offset="1" stop-color="#6D28D9"/>
+              </linearGradient>
+              <linearGradient id="g2" x1="86" y1="38" x2="154" y2="106" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#4ADE80"/>
+                <stop offset="1" stop-color="#059669"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </section>
+
+      <div class="grid-4">
+        <article class="glass-card" style="cursor:pointer" data-route="games">
+          <div class="card-body">
+            <span class="tag mint">Interactive</span>
+            <h2 class="card-title">Games</h2>
+            <p class="card-desc">Automatically loads every HTML game inside your repository's <code>games/</code> folder.</p>
+          </div>
+        </article>
+        <article class="glass-card" style="cursor:pointer" data-route="characters">
+          <div class="card-body">
+            <span class="tag">Cast</span>
+            <h2 class="card-title">Characters</h2>
+            <p class="card-desc">Profiles and artwork for original heroes, oddballs, and creatures from Godart Studios.</p>
+          </div>
+        </article>
+        <article class="glass-card" style="cursor:pointer" data-route="tv-movies">
+          <div class="card-body">
+            <span class="tag mint">Screen</span>
+            <h2 class="card-title">TV &amp; Movies</h2>
+            <p class="card-desc">Animated shorts, series concepts, and feature pilots in development.</p>
+          </div>
+        </article>
+        <article class="glass-card" style="cursor:pointer" data-route="books">
+          <div class="card-body">
+            <span class="tag">Balonie Books</span>
+            <h2 class="card-title">Books</h2>
+            <p class="card-desc">Illustrated stories, field guides, and chapter books published under Balonie Books.</p>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <!-- GAMES PAGE (Reads all .html files in /games folder) -->
+    <section id="view-games" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Games</h1>
+          <p class="page-subtitle">Loaded directly from the <code>/games</code> folder in this repository.</p>
+        </div>
+        <button class="repo-pill" id="configure-repo-btn" title="Set GitHub username/repo">
+          <span>Repo:</span>
+          <strong id="repo-label">Auto-detecting...</strong>
+        </button>
+      </div>
+
+      <div class="controls-bar glass">
+        <input type="search" id="game-search" class="search-input" placeholder="Filter games in /games..." />
+        <div class="btn-row">
+          <button class="btn" id="refresh-games-btn">Refresh Folder</button>
+        </div>
+      </div>
+
+      <div id="games-container" class="grid-3">
+        <div class="status-banner glass" style="grid-column: 1 / -1;">
+          Scanning <code>games/</code> folder for <code>.html</code> files...
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARACTERS PAGE -->
+    <section id="view-characters" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Characters</h1>
+          <p class="page-subtitle">Original characters created by Godart Studios &amp; Balonie Books.</p>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <article class="glass-card">
+          <div class="card-art" style="background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(74,222,128,0.22));">
+            <svg width="86" height="86" viewBox="0 0 86 86" fill="none">
+              <circle cx="43" cy="43" r="30" fill="#C084FC" fill-opacity="0.85"/>
+              <circle cx="34" cy="39" r="4" fill="#130B20"/>
+              <circle cx="52" cy="39" r="4" fill="#130B20"/>
+              <path d="M36 51C39 54 47 54 50 51" stroke="#130B20" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="tag">Original Cast</span>
+            <h2 class="card-title">Pip</h2>
+            <p class="card-desc">Curious explorer of moss-covered ruins and collector of strange mechanical trinkets.</p>
+          </div>
+        </article>
+
+        <article class="glass-card">
+          <div class="card-art" style="background: linear-gradient(135deg, rgba(16,185,129,0.35), rgba(139,92,246,0.22));">
+            <svg width="86" height="86" viewBox="0 0 86 86" fill="none">
+              <rect x="17" y="19" width="52" height="48" rx="18" fill="#4ADE80" fill-opacity="0.85"/>
+              <circle cx="34" cy="41" r="4" fill="#0D1615"/>
+              <circle cx="52" cy="41" r="4" fill="#0D1615"/>
+              <rect x="37" y="51" width="12" height="4" rx="2" fill="#0D1615"/>
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="tag mint">Balonie Books</span>
+            <h2 class="card-title">Barnaby Balonie</h2>
+            <p class="card-desc">Self-proclaimed inventor whose contraptions always work—just rarely the way intended.</p>
+          </div>
+        </article>
+
+        <article class="glass-card">
+          <div class="card-art" style="background: linear-gradient(135deg, rgba(192,132,252,0.32), rgba(5,150,105,0.28));">
+            <svg width="86" height="86" viewBox="0 0 86 86" fill="none">
+              <polygon points="43,14 70,66 16,66" fill="#A78BFA" fill-opacity="0.88"/>
+              <circle cx="37" cy="48" r="3.5" fill="#130B20"/>
+              <circle cx="49" cy="48" r="3.5" fill="#130B20"/>
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="tag">Guardian</span>
+            <h2 class="card-title">Sprout</h2>
+            <p class="card-desc">A quiet forest spirit who guides lost travelers back to the main footpath.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- TV & MOVIES PAGE -->
+    <section id="view-tv-movies" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">TV &amp; Movies</h1>
+          <p class="page-subtitle">Animated shorts, pilots, and screen productions from Godart Studios.</p>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <article class="glass-card">
+          <div class="card-body">
+            <span class="tag mint">Animated Series</span>
+            <h2 class="card-title">The Balonie Chronicles</h2>
+            <p class="card-desc">Eleven-minute episodes following Barnaby and Pip across oddball towns and floating islands.</p>
+          </div>
+        </article>
+
+        <article class="glass-card">
+          <div class="card-body">
+            <span class="tag">Short Film</span>
+            <h2 class="card-title">Midnight in the Orchard</h2>
+            <p class="card-desc">An atmospheric hand-crafted short set under lavender skies and glowing emerald canopies.</p>
+          </div>
+        </article>
+
+        <article class="glass-card">
+          <div class="card-body">
+            <span class="tag mint">In Development</span>
+            <h2 class="card-title">After School Arcade</h2>
+            <p class="card-desc">A comedy-adventure feature where neighborhood kids step inside unfinished cartridge worlds.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- BOOKS PAGE -->
+    <section id="view-books" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Books</h1>
+          <p class="page-subtitle">Stories, illustrated editions, and field guides by Balonie Books.</p>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <article class="glass-card">
+          <div class="card-body">
+            <span class="tag">Balonie Books</span>
+            <h2 class="card-title">A Field Guide to Nonsense</h2>
+            <p class="card-desc">Illustrated encyclopedia cataloging peculiar creatures, snacks, and contraptions.</p>
+          </div>
+        </article>
+
+        <article class="glass-card">
+          <div class="card-body">
+            <span class="tag mint">Chapter Book</span>
+            <h2 class="card-title">The Great Plum Caper</h2>
+            <p class="card-desc">When the town's prize orchard vanishes overnight, clues point straight to the cloud line.</p>
+          </div>
+        </article>
+
+        <article class="glass-card">
+          <div class="card-body">
+            <span class="tag">Picture Book</span>
+            <h2 class="card-title">Where the Moss Grows</h2>
+            <p class="card-desc">A bedtime adventure through quiet woods, lantern-lit paths, and sleepy treehouses.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ABOUT PAGE -->
+    <section id="view-about" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">About</h1>
+        </div>
+      </div>
+
+      <div class="about-card glass">
+        <p>All Games, Entertainment and Characters on godart.pages.dev are Copyrighted by Godart Studios and Balonie Books. Use without proper authorization is not permitted. (But trust I'll give permission easily enough just ask.)</p>
+        <p>Site made in 2026 by Hazza.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Frosted Glass Game Player Window -->
+  <div id="player-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="window-frame">
+      <div class="window-bar">
+        <div class="traffic-lights">
+          <button class="tl tl-close" id="close-modal-btn" title="Close"></button>
+          <span class="tl tl-min"></span>
+          <span class="tl tl-max"></span>
+        </div>
+        <span class="window-title" id="modal-game-title">Game</span>
+        <a id="modal-newtab-link" class="btn" style="padding: 5px 12px; font-size: 12px;" href="#" target="_blank" rel="noopener">Open Tab</a>
+      </div>
+      <iframe id="modal-game-frame" class="window-iframe" src="about:blank" title="Game Viewport"></iframe>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Multi-Page Hash Router ----------
+    const views = ["overview", "games", "characters", "tv-movies", "books", "about"];
+
+    function navigateTo(route) {
+      if (!views.includes(route)) route = "overview";
+      document.querySelectorAll(".view").forEach(el => el.classList.remove("active"));
+      const target = document.getElementById("view-" + route);
+      if (target) target.classList.add("active");
+
+      document.querySelectorAll(".nav-pill").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.route === route);
+      });
+
+      if (window.location.hash !== "#" + route) {
+        history.replaceState(null, "", "#" + route);
+      }
+
+      if (route === "games" && !gamesLoaded) {
+        loadGamesFromFolder();
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const routeTrigger = e.target.closest("[data-route]");
+      if (routeTrigger) {
+        e.preventDefault();
+        navigateTo(routeTrigger.dataset.route);
+      }
+    });
+
+    window.addEventListener("hashchange", () => {
+      const hashRoute = window.location.hash.replace("#", "");
+      navigateTo(hashRoute || "overview");
+    });
+
+    // ---------- Discover all .html files inside /games folder ----------
+    let allGames = [];
+    let gamesLoaded = false;
+
+    function detectRepoSlug() {
+      const saved = localStorage.getItem("godart_repo_slug");
+      if (saved) return saved;
+
+      const host = window.location.hostname;
+      // e.g. username.github.io/repo-name
+      if (host.endsWith("github.io")) {
+        const owner = host.split(".")[0];
+        const pathParts = window.location.pathname.split("/").filter(Boolean);
+        const repo = pathParts[0] || `${owner}.github.io`;
+        return `${owner}/${repo}`;
+      }
+      // On Cloudflare Pages (e.g. godart.pages.dev), ask or default if configured
+      return "";
+    }
+
+    function formatGameName(filename) {
+      return filename
+        .replace(/\.html?$/i, "")
+        .replace(/[-_]+/g, " ")
+        .replace(/ \w/g, c => c.toUpperCase());
+    }
+
+    async function loadGamesFromFolder() {
+      const container = document.getElementById("games-container");
+      const repoLabel = document.getElementById("repo-label");
+      const slug = detectRepoSlug();
+
+      repoLabel.textContent = slug || "Click to set GitHub repo";
+
+      let files = [];
+
+      // 1. Try GitHub API to list every .html file in /games
+      if (slug && slug.includes("/")) {
+        try {
+          const res = await fetch(`https://api.github.com/repos/${slug}/contents/games`);
+          if (res.ok) {
+            const items = await res.json();
+            if (Array.isArray(items)) {
+              files = items
+                .filter(item => item.type === "file" && /\.html?$/i.test(item.name))
+                .map(item => ({
+                  name: formatGameName(item.name),
+                  file: item.name,
+                  path: `games/${item.name}`
+                }));
+            }
+          }
+        } catch (err) {
+          console.warn("GitHub API lookup skipped:", err);
+        }
+      }
+
+      // 2. Fallback: check games/index.json or games.json if present in repo
+      if (files.length === 0) {
+        for (const manifestUrl of ["games/games.json", "games.json"]) {
+          try {
+            const res = await fetch(manifestUrl);
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data)) {
+                files = data.map(entry => {
+                  const fname = typeof entry === "string" ? entry : entry.file;
+                  return {
+                    name: (typeof entry === "object" && entry.title) ? entry.title : formatGameName(fname),
+                    file: fname,
+                    path: fname.startsWith("games/") ? fname : `games/${fname}`
+                  };
+                });
+                break;
+              }
+            }
+          } catch (_) {}
+        }
+      }
+
+      gamesLoaded = true;
+      allGames = files;
+      renderGames(allGames);
+    }
+
+    function renderGames(list) {
+      const container = document.getElementById("games-container");
+      const slug = detectRepoSlug();
+
+      if (!list || list.length === 0) {
+        container.innerHTML = `
+          <div class="status-banner glass" style="grid-column: 1 / -1;">
+            <p style="margin-bottom:10px; color:#fff; font-weight:600;">No .html files found in <code>/games</code> yet.</p>
+            <p style="font-size:13.5px; max-width:54ch; margin:0 auto 14px;">
+              ${slug
+                ? `Looking inside <code>${slug}/games</code>. Add any <code>.html</code> game file into your <code>games/</code> folder and click Refresh.`
+                : `Since you're on Cloudflare Pages, click <strong>Repo</strong> above to enter your GitHub <code>username/repo</code> so this page can automatically list every <code>.html</code> file in <code>games/</code>.`}
+            </p>
+            <button class="btn btn-accent" onclick="promptRepoSlug()">Set GitHub Repo</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map((game, idx) => {
+        const isEven = idx % 2 === 0;
+        const grad = isEven
+          ? "linear-gradient(135deg, rgba(168,85,247,0.34), rgba(16,185,129,0.26))"
+          : "linear-gradient(135deg, rgba(16,185,129,0.34), rgba(139,92,246,0.26))";
+
+        return `
+          <article class="glass-card" style="cursor:pointer" onclick="openGameModal('${game.path.replace(/'/g, "\'")}', '${game.name.replace(/'/g, "\'")}')">
+            <div class="card-art" style="background: ${grad};">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <rect x="10" y="18" width="44" height="28" rx="14" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)"/>
+                <circle cx="24" cy="32" r="4" fill="#fff"/>
+                <circle cx="40" cy="29" r="2.8" fill="#4ADE80"/>
+                <circle cx="44" cy="35" r="2.8" fill="#C084FC"/>
+              </svg>
+            </div>
+            <div class="card-body">
+              <span class="tag ${isEven ? "mint" : ""}">${game.file}</span>
+              <h2 class="card-title">${game.name}</h2>
+              <p class="card-desc">Click to play inside a glass window or launch in a new tab.</p>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function promptRepoSlug() {
+      const current = detectRepoSlug();
+      const input = prompt("Enter your GitHub repository (format: username/repo-name):", current || "hazza/godart");
+      if (input !== null && input.trim()) {
+        localStorage.setItem("godart_repo_slug", input.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\/$/, ""));
+        gamesLoaded = false;
+        loadGamesFromFolder();
+      }
+    }
+
+    document.getElementById("configure-repo-btn").addEventListener("click", promptRepoSlug);
+    document.getElementById("refresh-games-btn").addEventListener("click", () => {
+      gamesLoaded = false;
+      loadGamesFromFolder();
+    });
+
+    document.getElementById("game-search").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = allGames.filter(g => g.name.toLowerCase().includes(q) || g.file.toLowerCase().includes(q));
+      renderGames(filtered);
+    });
+
+    // ---------- Game Window Modal ----------
+    const modal = document.getElementById("player-modal");
+    const iframe = document.getElementById("modal-game-frame");
+    const modalTitle = document.getElementById("modal-game-title");
+    const newTabLink = document.getElementById("modal-newtab-link");
+
+    function openGameModal(path, title) {
+      modalTitle.textContent = title;
+      newTabLink.href = path;
+      iframe.src = path;
+      modal.classList.add("open");
+    }
+
+    function closeGameModal() {
+      modal.classList.remove("open");
+      iframe.src = "about:blank";
+    }
+
+    document.getElementById("close-modal-btn").addEventListener("click", closeGameModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeGameModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("open")) closeGameModal();
+    });
+
+    // Initialize initial route
+    const initialRoute = window.location.hash.replace("#", "") || "overview";
+    navigateTo(initialRoute);
+  </script>
+</body>
+</html>
