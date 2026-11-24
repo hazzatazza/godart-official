@@ -8,7 +8,6 @@
     :root {
       --glass-bg: rgba(255, 255, 255, 0.08);
       --glass-bg-hover: rgba(255, 255, 255, 0.13);
-      --glass-bg-elevated: rgba(24, 16, 36, 0.72);
       --glass-border: rgba(255, 255, 255, 0.18);
       --glass-border-strong: rgba(255, 255, 255, 0.28);
       --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.26);
@@ -67,6 +66,9 @@
     }
 
     .glass-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
       background: rgba(255, 255, 255, 0.075);
       backdrop-filter: blur(36px) saturate(185%);
       -webkit-backdrop-filter: blur(36px) saturate(185%);
@@ -406,77 +408,6 @@
       font-weight: 600;
     }
 
-    /* Glass Window Modal for Playing Games */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      background: rgba(7, 5, 12, 0.68);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .window-frame {
-      width: 100%;
-      max-width: 980px;
-      height: 82vh;
-      border-radius: 24px;
-      background: rgba(22, 16, 33, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 30px 70px rgba(0, 0, 0, 0.55);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .window-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: rgba(255, 255, 255, 0.06);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .traffic-lights {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .tl {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-    }
-
-    .tl-close { background: #ff5f57; }
-    .tl-min { background: #febc2e; }
-    .tl-max { background: #28c840; }
-
-    .window-title {
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .window-iframe {
-      flex: 1;
-      width: 100%;
-      border: none;
-      background: #0d0914;
-    }
-
     .status-banner {
       padding: 28px;
       border-radius: var(--radius-lg);
@@ -563,7 +494,7 @@
           <div class="card-body">
             <span class="tag mint">Interactive</span>
             <h2 class="card-title">Games</h2>
-            <p class="card-desc">Browser games loaded from <code>games.json</code> and played right inside <code>games/</code>.</p>
+            <p class="card-desc">Browser games loaded from <code>games.json</code> and opened directly at <code>/games/&lt;name&gt;</code>.</p>
           </div>
         </article>
         <article class="glass-card" style="cursor:pointer" data-route="characters">
@@ -590,12 +521,12 @@
       </div>
     </main>
 
-    <!-- GAMES PAGE (Reads locally from ./games.json and launches ./games/<file>) -->
+    <!-- GAMES PAGE -->
     <section id="view-games" class="view">
       <div class="page-header">
         <div>
           <h1 class="page-title">Games</h1>
-          <p class="page-subtitle">Select a title to launch it in a frosted window or open it in a new tab.</p>
+          <p class="page-subtitle">Select any game to open its page directly.</p>
         </div>
       </div>
 
@@ -759,22 +690,6 @@
     </section>
   </div>
 
-  <!-- Frosted Glass Game Player Window -->
-  <div id="player-modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="window-frame">
-      <div class="window-bar">
-        <div class="traffic-lights">
-          <button class="tl tl-close" id="close-modal-btn" title="Close"></button>
-          <span class="tl tl-min"></span>
-          <span class="tl tl-max"></span>
-        </div>
-        <span class="window-title" id="modal-game-title">Game</span>
-        <a id="modal-newtab-link" class="btn" style="padding: 5px 12px; font-size: 12px;" href="#" target="_blank" rel="noopener">Open Tab</a>
-      </div>
-      <iframe id="modal-game-frame" class="window-iframe" src="about:blank" title="Game Viewport"></iframe>
-    </div>
-  </div>
-
   <script>
     // ---------- Multi-Page Hash Router ----------
     const views = ["overview", "games", "characters", "tv-movies", "books", "about"];
@@ -819,7 +734,7 @@
       return filename
         .replace(/\.html?$/i, "")
         .replace(/[-_]+/g, " ")
-        .replace(/\b\w/g, c => c.toUpperCase());
+        .replace(/ \w/g, c => c.toUpperCase());
     }
 
     async function loadGamesFromJson() {
@@ -832,6 +747,7 @@
         allGames = (Array.isArray(data) ? data : []).map(entry => {
           const rawFile = typeof entry === "string" ? entry : entry.file;
           const cleanFile = rawFile.replace(/^games\//i, "");
+          const slug = cleanFile.replace(/\.html?$/i, "");
           const title = (typeof entry === "object" && entry.title)
             ? entry.title
             : formatGameName(cleanFile);
@@ -839,7 +755,8 @@
           return {
             name: title,
             file: cleanFile,
-            path: `games/${cleanFile}`
+            slug: slug,
+            url: `/games/${slug}`
           };
         });
 
@@ -874,7 +791,7 @@
           : "linear-gradient(135deg, rgba(16,185,129,0.34), rgba(139,92,246,0.26))";
 
         return `
-          <article class="glass-card" style="cursor:pointer" onclick="openGameModal('${game.path.replace(/'/g, "\'")}', '${game.name.replace(/'/g, "\'")}')">
+          <a class="glass-card" href="${game.url}">
             <div class="card-art" style="background: ${grad};">
               <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
                 <rect x="10" y="18" width="44" height="28" rx="14" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.5)"/>
@@ -884,11 +801,11 @@
               </svg>
             </div>
             <div class="card-body">
-              <span class="tag ${isEven ? "mint" : ""}">${game.file}</span>
+              <span class="tag ${isEven ? "mint" : ""}">/games/${game.slug}</span>
               <h2 class="card-title">${game.name}</h2>
-              <p class="card-desc">Click to play inside a glass window or launch in a new tab.</p>
+              <p class="card-desc">Play ${game.name} in full screen.</p>
             </div>
-          </article>
+          </a>
         `;
       }).join("");
     }
@@ -900,34 +817,8 @@
 
     document.getElementById("game-search").addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase().trim();
-      const filtered = allGames.filter(g => g.name.toLowerCase().includes(q) || g.file.toLowerCase().includes(q));
+      const filtered = allGames.filter(g => g.name.toLowerCase().includes(q) || g.slug.toLowerCase().includes(q));
       renderGames(filtered);
-    });
-
-    // ---------- Game Window Modal ----------
-    const modal = document.getElementById("player-modal");
-    const iframe = document.getElementById("modal-game-frame");
-    const modalTitle = document.getElementById("modal-game-title");
-    const newTabLink = document.getElementById("modal-newtab-link");
-
-    function openGameModal(path, title) {
-      modalTitle.textContent = title;
-      newTabLink.href = path;
-      iframe.src = path;
-      modal.classList.add("open");
-    }
-
-    function closeGameModal() {
-      modal.classList.remove("open");
-      iframe.src = "about:blank";
-    }
-
-    document.getElementById("close-modal-btn").addEventListener("click", closeGameModal);
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeGameModal();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.classList.contains("open")) closeGameModal();
     });
 
     // Initialize initial route
