@@ -230,16 +230,16 @@ const P=mk('You',0xf2fbff,1);NM.forEach((n,i)=>mk(n,COL[i],0));P.dm=1;chars.slic
 function fl(x,z){for(const p of PITS)if(x>p[0]&&x<p[1]&&z>p[2]&&z<p[3])return -4;return 0}
 function sf(b,x,z){if(x<b.x0||x>b.x1||z<b.z0||z>b.z1)return null;if(!b.r)return b.y1;const dx=x-b.x,dz=z-b.z,lx=dx*b.c-dz*b.s,lz=dx*b.s+dz*b.c;return Math.abs(lx)<b.w/2&&Math.abs(lz)<b.d/2?b.y0+b.h*(lx/b.w+.5):null}
 function G(x,z,y){let h=fl(x,z);for(const b of SO){const t=sf(b,x,z);if(t!==null&&t<=y+(b.r?.9:.6)&&t>h)h=t}return h}
-function bk(x,z,y){if(fl(x,z)>y+.6)return 1;for(const b of SO){const t=sf(b,x,z);if(t!==null&&t>y+(b.r?.9:.6)&&b.y0<y+2.7)return 1}return 0}
+function bk(x,z,y,tl=.6){if(fl(x,z)>y+tl)return 1;for(const b of SO){const t=sf(b,x,z);if(t!==null&&t>y+(b.r?tl+.3:tl)&&b.y0<y+2.7)return 1}return 0}
 function ce(x,z,y){let m=99;for(const b of SO)if(b.y0>y+1.4&&b.y0<m&&sf(b,x,z)!==null)m=b.y0;return m}
 function inS(x,y,z){if(y<fl(x,z))return 1;for(const b of SO){const t=sf(b,x,z);if(t!==null&&y<t&&y>=b.y0)return 1}return 0}
-const SD=[[.45,0],[-.45,0],[0,.45],[0,-.45],[.32,.32],[-.32,.32],[.32,-.32],[-.32,-.32]],free=(x,z,y)=>SD.every(o=>!bk(x+o[0],z+o[1],y));
-function mv(c,dx,dz){if(free(c.x+dx,c.z+dz,c.y)){c.x+=dx;c.z+=dz}else if(free(c.x+dx,c.z,c.y))c.x+=dx;else if(free(c.x,c.z+dz,c.y))c.z+=dz}
-function unstick(c){for(let r=.4;r<8;r+=.4)for(let i=0;i<16;i++){const a=i/16*6.283,x=c.x+Math.cos(a)*r,z=c.z+Math.sin(a)*r;if(Math.abs(x)<WB&&Math.abs(z)<WB&&!bk(x,z,c.y)&&free(x,z,c.y)){c.x=x;c.z=z;c.kx=c.kz=0;return}}const p=spawn();c.x=p.x;c.z=p.z;c.y=0;c.vy=0}
-function phys(c,dt){mv(c,c.kx*dt,c.kz*dt);const k=Math.exp(-6*dt);c.kx*=k;c.kz*=k;c.vy-=28*dt;c.y+=c.vy*dt;
+const SD=[[.45,0],[-.45,0],[0,.45],[0,-.45],[.32,.32],[-.32,.32],[.32,-.32],[-.32,-.32]],free=(x,z,y,tl)=>SD.every(o=>!bk(x+o[0],z+o[1],y,tl));
+function mv(c,dx,dz){const tl=c.gr?.6:.1;if(free(c.x+dx,c.z+dz,c.y,tl)){c.x+=dx;c.z+=dz}else if(free(c.x+dx,c.z,c.y,tl))c.x+=dx;else if(free(c.x,c.z+dz,c.y,tl))c.z+=dz}
+function unstick(c){for(let r=.05;r<8;r+=r<.8?.05:.4)for(let i=0;i<16;i++){const a=i/16*6.283,x=c.x+Math.cos(a)*r,z=c.z+Math.sin(a)*r;if(Math.abs(x)<WB&&Math.abs(z)<WB&&!bk(x,z,c.y)&&free(x,z,c.y)){c.x=x;c.z=z;c.kx=c.kz=0;return}}const p=spawn();c.x=p.x;c.z=p.z;c.y=0;c.vy=0}
+function phys(c,dt){const kl=Math.hypot(c.kx,c.kz);if(kl>9){c.kx*=9/kl;c.kz*=9/kl}mv(c,c.kx*dt,c.kz*dt);const k=Math.exp(-6*dt);c.kx*=k;c.kz*=k;c.vy-=28*dt;c.y+=c.vy*dt;
  c.x=Math.max(-WB,Math.min(WB,c.x));c.z=Math.max(-WB,Math.min(WB,c.z));
  const cl=ce(c.x,c.z,c.y);if(c.y+2.71>cl){c.y=cl-2.71;if(c.vy>0)c.vy=0}
- if(bk(c.x,c.z,c.y))unstick(c);
+ if(!free(c.x,c.z,c.y,.6)||bk(c.x,c.z,c.y))unstick(c);
  const h=G(c.x,c.z,c.y);if(c.gr&&c.vy<=0&&c.y>h&&c.y-h<.35)c.y=h;if(c.y<=h){c.y=h;c.vy=0;c.jmp=0}c.gr=c.y<=h+.01}
 function mvIn(c,f,s,sp,dt){const a=Math.sin(c.yaw),b=Math.cos(c.yaw);mv(c,(-a*f+b*s)*sp*dt,(-b*f-a*s)*sp*dt);c.sp=Math.hypot(f,s)*sp/13}
 const jump=c=>{if(c.jmp<2){c.vy=10;c.jmp++}};
