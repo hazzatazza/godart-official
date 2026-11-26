@@ -350,6 +350,8 @@ const SENTENCES = ['A cat riding a skateboard','A dinosaur eating spaghetti','Gr
 'A zombie at a birthday party','A flying toaster','A llama giving a TED talk','A clown stuck in an elevator','A robot learning to dance','A snail on a rocket',
 'A monkey taking a selfie','A vampire at the beach','A hot dog in a bathtub','A squirrel with a jetpack','A duck in a tuxedo','A cactus getting a hug',
 'A king sitting on a tiny chair','A whale in a swimming pool','Aliens ordering tacos','A sleepy dragon in a library','A ninja doing the dishes','An elephant on a trampoline'];
+const PANIC_IDEAS = ["A flamingo stuck in a vending machine", "A wizard doing his taxes", "A pigeon starting a podcast", "Grandma skydiving into a cake", "A T-rex using a smartphone", "A banana wearing a tuxedo at court", "A robot crying at a wedding", "A cow on a first date with a toaster", "A knight fighting a Roomba", "A llama on a roller coaster", "A snowman in a sauna", "A shark learning to cook", "A raccoon DJing at a funeral", "An octopus knitting sweaters", "A potato running a marathon", "A dragon at the dentist", "Aliens at a bake sale", "A pirate lost in IKEA", "A cat piloting a tiny airplane", "A mermaid in a bathtub", "A ghost applying for a job", "A hamster leading an army", "A frog selling insurance", "A penguin at a beach party", "A giant duck in a traffic jam", "A vampire at the dentist", "A snail winning a race", "A scarecrow on a date", "A walrus in a tuxedo", "A wizard stuck in an elevator", "A hamster running a tiny taxi company", "A dragon returning a library book 400 years late", "A crab teaching a yoga class", "A cat arguing with its own reflection in court", "A sloth in a hurry", "A robot buying its first pair of shoes", "A bear stuck in a drive-through", "A cow lifting weights at the gym", "A turtle on a skateboard doing a trick", "Santa stuck in a chimney at a barbecue", "A giraffe getting a haircut in a salon", "A ghost scared of a tiny puppy", "A penguin selling ice to a polar bear", "A wizard losing a duel to a pigeon", "A mailman being chased by a giant snail", "A shark in a bubble bath", "A knight taking a selfie with a dragon", "A pizza delivery guy on a unicorn", "A goldfish walking a human on a leash", "An astronaut finding a pizza on the moon"];
+const randPanic = () => PANIC_IDEAS[Math.floor(Math.random() * PANIC_IDEAS.length)];
 const randSentence = () => SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
 
 /* ------------------------------------------------------------- state */
@@ -463,10 +465,11 @@ function route() {
     updateLobby();
   } else if (st.phase === 'play') {
     if (mode === 'fakeartist') { const key = 'fa' + g.gid; if (S.key !== key) buildFA(key); updateFA(); return; }
-    if (mode === 'forgery' && g.round === 2) {
+    if (mode === 'forgery' && g.round === 3) {
       if (!S.vcTotal || S.vc.filter(Boolean).length < S.vcTotal) { if (S.key !== 'wait') buildWait('Loading the drawings…'); return; }
       const key = 'fv' + g.gid; if (S.key !== key) buildFV(key); updateFV(); return;
     }
+    if (mode === 'panic' && g.phase === 'pick') { const key = 'pk' + g.gid + g.round; if (S.key !== key) buildPick(key); updatePick(); return; }
     if (mode === 'panic' && g.phase !== 'draw') {
       if (panicItems().length < g.order.length) { if (S.key !== 'wait') buildWait('Loading the drawings…'); return; }
       const key = 'pv' + g.gid + g.round; if (S.key !== key) buildPanic(key); updatePanic(); return;
@@ -593,10 +596,10 @@ function updateLobby() {
   } else {
     const opts = [];
     if (mi.chain || mi.speed) opts.push(h('div', { class: 'opt' }, h('h5', {}, 'TIME'), seg([['slow', 'SLOW'], ['normal', 'NORMAL'], ['fast', 'FAST'], ['infinite', 'INFINITE']], set.speed, isHost, (k) => send({ t: 'settings', speed: k })),
-      h('p', {}, mode === 'forgery' ? 'Normal: 60s to draw, 5s peek + 45s to copy, 50s to vote.' : 'Normal: 50s to write, 150s to draw, 40s to describe. Slow doubles it, fast halves it.')));
+      h('p', {}, mode === 'forgery' ? 'Normal: 30s to write your prompt, 60s to draw, 5s peek + 45s to copy, 50s to vote.' : 'Normal: 50s to write, 150s to draw, 40s to describe. Slow doubles it, fast halves it.')));
     if (mi.chain) opts.push(h('div', { class: 'opt' }, h('h5', {}, 'TURNS'), seg([['few', 'FEW'], ['most', 'MOST'], ['all', 'ALL']], set.turns, isHost, (k) => send({ t: 'settings', turns: k })),
       h('p', {}, 'Choose how many turns the players will play in order to create an album')));
-    if (!opts.length) opts.push(h('div', { class: 'opt' }, h('h5', {}, mi.name), h('p', {}, mode === 'panic' ? 'Fixed rules: 30-second drawings, 30-second votes, 3 rounds, 100 points per vote.' : 'Fixed rules: 5 seconds per line, 2 laps per vote, 3 votes max, 15 seconds for the Impostor to guess.')));
+    if (!opts.length) opts.push(h('div', { class: 'opt' }, h('h5', {}, mi.name), h('p', {}, mode === 'panic' ? 'Fixed rules: a different player picks the prompt each round while everyone waits, then all draw for 30 seconds, then vote. 3 rounds, 100 points per vote.' : 'Fixed rules: 5 seconds per line, 2 laps per vote, 3 votes max, 15 seconds for the Impostor to guess.')));
     opts.push(h('div', { class: 'opt' }, h('h5', {}, 'MODE'), h('div', { class: 'seg' }, h('button', { class: 'on', disabled: true }, mi.name))));
     L.cfg.replaceChildren(...opts, est);
   }
@@ -646,7 +649,7 @@ async function buildTurn() {
   const lead = t.remaining != null ? Math.max(0, t.remaining - S.totalMs) : 0;
   S.deadline = t.remaining != null ? performance.now() + t.remaining : null;
   S.startAt = S.deadline != null ? S.deadline - S.totalMs : null;
-  bg(t.type === 'start' ? BG.start : t.type === 'write' ? BG.write : BG.draw);
+  bg(t.type === 'start' || t.type === 'forge0' ? BG.start : t.type === 'write' ? BG.write : BG.draw);
   const isDraw = ['draw', 'forge1', 'forge2', 'panic'].includes(t.type);
 
   // prepare mode-specific artwork before building the screen
@@ -664,26 +667,26 @@ async function buildTurn() {
   const onEnter = (e) => { if (e.key === 'Enter') { e.preventDefault(); toggleReady(); } };
   let book, extra = null, refEl = null;
 
-  if (t.type === 'start') {
-    const sug = randSentence();
-    S.input = h('textarea', { class: 'txt-w', maxlength: 60, rows: 2, placeholder: sug, autocomplete: 'off' });
+  if (t.type === 'start' || t.type === 'forge0') {
+    const sug = t.type === 'forge0' ? '' : randSentence();
+    S.input = h('textarea', { class: 'txt-w', maxlength: 100, rows: 2, placeholder: t.type === 'forge0' ? 'Write a weird secret prompt — leave it empty for a surprise one...' : sug, autocomplete: 'off' });
     S.input.dataset.sug = sug;
     S.input.addEventListener('keydown', onEnter);
-    T.cnt = h('span', { class: 'cnt' }, '0/60');
-    S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/60'; });
-    book = bookShell(mode === 'story' ? 'START A STORY' : mode === 'pixel' || mode === 'zoom' || mode === 'evolution' ? 'WRITE A PROMPT TO DRAW' : 'WRITE A SENTENCE',
+    T.cnt = h('span', { class: 'cnt' }, '0/100');
+    S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/100'; });
+    book = t.type === 'forge0' ? bookShell('WRITE YOUR SECRET PROMPT', h('h3', {}, 'Only you will know it — you will draw it next, and others will fake it!'), h('div', {}, S.input, T.cnt), 'text') : bookShell(mode === 'story' ? 'START A STORY' : mode === 'pixel' || mode === 'zoom' || mode === 'evolution' ? 'WRITE A PROMPT TO DRAW' : 'WRITE A SENTENCE',
       h('h3', {}, mode === 'story' ? 'Write the opening sentence of a story...' : 'Start writing a story...'), h('div', {}, S.input, T.cnt), 'text');
   } else if (t.type === 'write' && p && p.kind === 'text') {          // Story mode: continue the previous sentence
-    S.input = h('textarea', { class: 'txt-w', maxlength: 60, rows: 2, placeholder: 'Write the next sentence of the story...', autocomplete: 'off' });
+    S.input = h('textarea', { class: 'txt-w', maxlength: 100, rows: 2, placeholder: 'Write the next sentence of the story...', autocomplete: 'off' });
     S.input.addEventListener('keydown', onEnter);
-    T.cnt = h('span', { class: 'cnt' }, '0/60');
-    S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/60'; syncBtn(); });
+    T.cnt = h('span', { class: 'cnt' }, '0/100');
+    S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/100'; syncBtn(); });
     book = bookShell('CONTINUE THE STORY', h('h3', {}, '“' + p.content + '”'), h('div', {}, S.input, T.cnt), 'text');
   } else if (t.type === 'write') {                                      // describe a drawing
-    S.input = h('textarea', { class: 'txt-w', maxlength: 60, rows: 2, placeholder: 'Type your description for this scene here...', autocomplete: 'off' });
+    S.input = h('textarea', { class: 'txt-w', maxlength: 100, rows: 2, placeholder: 'Type your description for this scene here...', autocomplete: 'off' });
     S.input.addEventListener('keydown', onEnter);
-    T.cnt = h('span', { class: 'cnt' }, '0/60');
-    S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/60'; syncBtn(); });
+    T.cnt = h('span', { class: 'cnt' }, '0/100');
+    S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/100'; syncBtn(); });
     const pic = p && p.kind === 'image' ? h('img', { class: 'pic', src: p.content, alt: 'drawing' }) : h('div', { class: 'pic', style: { display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontStyle: 'italic' } }, '(no drawing)');
     book = bookShell('NOW IT\'S YOUR TURN TO DESCRIBE THIS SCENE', h('h3', {}), h('div', {}, pic), '');
     book.classList.add('tall');
@@ -1033,12 +1036,12 @@ function updateAlbums() {
 const MODE_INFO = [
   { id: 'normal', name: 'NORMAL', ic: '📞', desc: 'The basis of it all! Write and draw alternately until you reach the last turn', chain: true },
   { id: 'story', name: 'STORY', ic: '📖', desc: 'Pure writing: continue the story one sentence at a time, seeing only the sentence right before yours', chain: true },
-  { id: 'forgery', name: 'FORGERY', ic: '🕵️', desc: 'Draw a secret prompt, copy another drawing from a 5-second peek, then vote for the real original', speed: true },
+  { id: 'forgery', name: 'FORGERY', ic: '🕵️', desc: 'Write a secret prompt and draw it, copy another drawing from a 5-second peek, then vote for the real original', speed: true },
   { id: 'pixel', name: 'PIXEL DECAY', ic: '👾', desc: 'Draw only. Every pass halves the resolution and you redraw the blocky mess', chain: true },
   { id: 'zoom', name: 'ZOOM OUT', ic: '🔍', desc: 'You only see a small square of the last drawing. Draw the whole scene around it', chain: true },
   { id: 'evolution', name: 'EVOLUTION', ic: '🧬', desc: 'Edit the previous drawing directly, guided by a random mutation prompt', chain: true },
   { id: 'fakeartist', name: 'FAKE ARTIST', ic: '🎭', desc: 'One shared canvas, one line per turn. Find the Impostor who doesn\'t know the word' },
-  { id: 'panic', name: '30-SECOND PANIC', ic: '⏱️', desc: 'Everyone draws the same absurd prompt in 30 seconds, then votes. 3 quick rounds' },
+  { id: 'panic', name: '30-SECOND PANIC', ic: '⏱️', desc: 'One player picks an absurd prompt while the rest wait, then everyone draws it in 30 seconds and votes. 3 quick rounds' },
 ];
 const modeInfo = (id) => MODE_INFO.find((m) => m.id === id) || MODE_INFO[0];
 function estFor(mode, n, set) {
@@ -1046,7 +1049,7 @@ function estFor(mode, n, set) {
   if (mode === 'panic') return 4;
   if (mode === 'fakeartist') return Math.max(1, Math.round((12 * Math.max(n, 3) + 30) * 1.5 / 60));
   if (!m) return null;
-  if (mode === 'forgery') return Math.max(1, Math.round((60 + 5 + 45 + 50) * m / 60));
+  if (mode === 'forgery') return Math.max(1, Math.round((30 + 60 + 5 + 45 + 50) * m / 60));
   let s = 0;
   for (let t = 0; t < T; t++) s += t === 0 ? BASE.start : mode === 'story' ? BASE.write : mode === 'normal' ? (t % 2 ? BASE.draw : BASE.write) : BASE.draw;
   return Math.max(1, Math.round(s * m / 60));
@@ -1235,6 +1238,30 @@ function buildFAFinal() {
 
 /* ------------------------------------------------------ 30-SECOND PANIC */
 let PV = {};
+let PK = {};
+function buildPick(key) {
+  S.screen = 'pk'; S.key = key; bg(BG.start); clearInterval(S.tm);
+  PK = { t: h('b'), box: h('div', { class: 'card2', style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' } }), key: '' };
+  mount(h('div', { class: 'pg' }, h('div', { class: 'panelw' },
+    h('div', { class: 'logo glow', style: { fontSize: '28px', textAlign: 'center' } }, '30-SECOND PANIC'), PK.box, h('div', { class: 'hint' }, 'TIME LEFT: ', PK.t))));
+  S.pkDeadline = null; S.pkDl = ''; remainingTimer(PK.t, () => S.pkDeadline);
+}
+function updatePick() {
+  const st = S.st, g = st.game; if (S.screen !== 'pk') return;
+  const dk = g.round + ':' + g.remaining; if (S.pkDl !== dk) { S.pkDl = dk; S.pkDeadline = g.remaining != null ? performance.now() + g.remaining : null; }
+  const mine = g.prompter === S.me, pk = mine ? 'me' : 'o' + g.prompter;
+  if (PK.key === pk) return; PK.key = pk;
+  const pr = playerOf(g.prompter);
+  if (mine) {
+    const inp = h('input', { class: 'txt', maxlength: 100, placeholder: 'Type the absurd prompt everyone will draw...', autocomplete: 'off' });
+    const go = () => { send({ t: 'prompt', text: inp.value.trim() || randPanic() }); inp.disabled = true; };
+    inp.addEventListener('keydown', (e) => e.key === 'Enter' && go());
+    PK.box.replaceChildren(h('div', { class: 'bigmsg' }, `ROUND ${g.round + 1}/3 — YOU PICK THE PROMPT!`), h('div', { class: 'hint' }, 'Everyone else is waiting. Make it absurd — then all of you draw it for 30 seconds.'),
+      h('div', { style: { display: 'flex', gap: '8px', width: '100%' } }, inp, h('button', { class: 'btn yellow', title: 'Random idea', onclick: () => { inp.value = randPanic(); inp.focus(); } }, '🎲')),
+      h('button', { class: 'btn', style: { fontSize: '22px' }, onclick: go }, h('i', { class: 'play-ico' }), 'START ROUND'));
+    play('yourTurn', 0.7); setTimeout(() => inp.focus(), 50);
+  } else PK.box.replaceChildren(h('div', { class: 'bigmsg' }, `ROUND ${g.round + 1}/3`), avatar(pr.avatar, 90), h('div', { class: 'bigmsg' }, `${pr.name} is choosing the prompt…`), h('div', { class: 'spin' }), h('div', { class: 'hint' }, 'Get ready — you will have 30 seconds to draw it!'));
+}
 function panicItems() { const g = S.st.game; return S.pitems.filter((x) => x.round === g.round); }
 function buildPanic(key) {
   S.screen = 'pv'; S.key = key; bg(BG.write); S.pvVote = null; S.pvBuilt = ''; clearInterval(S.tm);
