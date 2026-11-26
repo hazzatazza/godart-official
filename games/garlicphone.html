@@ -209,6 +209,52 @@ canvas.cv{touch-action:none;cursor:crosshair}
 .endcard h4{margin:0;font-size:19px}
 .ctlrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:10px;background:rgba(20,5,60,.35)}
 @media(max-width:760px){.alb{grid-template-columns:1fr}.plist{flex-direction:row;overflow-x:auto;max-height:none}.pi{flex:none}}
+/* ---- extra modes ---- */
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.mcard{display:flex;gap:10px;align-items:flex-start;text-align:left;background:rgba(255,255,255,.1);border:3px solid transparent;border-radius:12px;padding:10px 12px;color:#fff;font:inherit;cursor:default}
+.mcard.click{cursor:pointer}.mcard.click:hover{background:rgba(255,255,255,.2)}
+.mcard.sel{background:rgba(255,255,255,.22);border-color:#fff}
+.mcard .ic{font-size:30px;line-height:1}.mcard h4{margin:0 0 2px;font-size:17px}.mcard p{margin:0;font-size:12.5px;opacity:.9;font-weight:700}
+.refbox{background:#fff;color:var(--ink);border-radius:10px;padding:8px;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.25);margin-bottom:4px}
+.refbox img{width:min(300px,70vw);aspect-ratio:758/424;display:block;margin:4px auto 0;image-rendering:pixelated;border:2px solid #d9c8ff}
+.cwrap{position:relative}.cwrap .ov{position:absolute;inset:0;pointer-events:none}
+.peek{position:absolute;inset:0;background:#fff;z-index:5;display:flex;align-items:center;justify-content:center}
+.peek img{width:100%;height:100%;object-fit:contain}.peek b{position:absolute;right:12px;top:8px;font-size:46px;color:#d12a5a;text-shadow:0 2px 0 #fff}
+.panelw{width:min(1000px,100%);display:flex;flex-direction:column;gap:12px;align-items:center}
+.card2{background:rgba(48,8,100,.55);border:2px solid rgba(255,255,255,.25);border-radius:14px;padding:12px;width:100%}
+.vcase{display:flex;flex-direction:column;gap:8px;align-items:center}
+.vcase .pr{font-size:18px}.vcase .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.vopt{border:4px solid transparent;border-radius:10px;background:#fff;cursor:pointer;padding:0;overflow:hidden;position:relative;font:inherit;color:var(--ink)}
+.vopt img{display:block;width:100%;aspect-ratio:758/424;background:#fff}.vopt.sel{border-color:#1fd37a;box-shadow:0 0 0 3px rgba(31,211,122,.4)}
+.vopt.real{border-color:#1fd37a}.vopt.fake{border-color:#ff4a6e}.vopt .tag{position:absolute;left:6px;top:6px;background:#201255;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px}
+.vopt .none{aspect-ratio:758/424;display:flex;align-items:center;justify-content:center;color:#999;font-style:italic}
+.vopt:disabled{cursor:default;opacity:.9}
+.score{display:flex;flex-direction:column;gap:8px;width:min(520px,100%)}
+.srow{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.22);border-radius:12px;padding:8px 12px;font-size:19px;font-weight:900}
+.srow .rk{width:28px;text-align:center;opacity:.8}.srow .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.srow .pt{color:var(--mint)}
+.srow.top{background:rgba(255,210,63,.28);border:2px solid #ffd23f}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;width:100%}
+.pcard{display:flex;flex-direction:column;gap:6px;align-items:center;background:rgba(255,255,255,.12);border-radius:12px;padding:8px}
+.pcard .vb{width:100%}.pcard .img{width:100%;border-radius:8px;overflow:hidden;background:#fff}.pcard img{display:block;width:100%;aspect-ratio:758/424}
+.pcard.mine{opacity:.75}
+.fa{width:min(1100px,100%);display:grid;grid-template-columns:1fr 230px;gap:14px;align-items:start}
+.farole{width:100%;background:rgba(0,0,0,.28);border-radius:12px;padding:10px 14px;text-align:center;font-size:20px;font-weight:900}
+.farole small{display:block;font-size:13px;opacity:.85;font-weight:700}
+.fa .core{margin:0 4px 20px;border-radius:8px}
+.fa canvas.cv{aspect-ratio:758/424}
+.fap{display:flex;flex-direction:column;gap:8px}.fap .pi{cursor:default}.fap .dot{width:14px;height:14px;border-radius:50%;border:2px solid #fff;flex:none}
+.fap .pi.cur{background:#fff;color:var(--ink);box-shadow:0 0 0 3px #ffd23f}
+.fabox{width:100%;background:rgba(0,0,0,.25);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+.fabox .bar{width:100%;height:12px;background:rgba(0,0,0,.3);border-radius:8px;overflow:hidden}.fabox .bar i{display:block;height:100%;background:#8dfab7;transition:width .15s linear}
+.vgrid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.bigmsg{font-size:clamp(20px,3.4vw,30px);font-weight:900}
+.storycard{background:#fff;color:#201255;border-radius:14px;padding:16px 20px;width:min(640px,100%);font-size:clamp(18px,2.3vw,24px);font-weight:900;line-height:1.5;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.storycard span{animation:itemin .5s;display:inline}.storycard .au{display:inline-block;width:.8em;height:.8em;border-radius:50%;vertical-align:-1px;margin-right:3px;background-size:cover;border:1px solid #d9c8ff}
+.pixrow{font-size:12px;opacity:.85;margin:2px 0}.mut{display:inline-block;background:#ffd23f;color:#201255;border-radius:8px;padding:2px 10px;font-size:14px;margin-bottom:4px}
+.zoomwrap{position:relative;overflow:hidden;background:#fff;border-radius:10px;box-shadow:0 4px 0 rgba(0,0,0,.25);cursor:pointer;aspect-ratio:758/424}
+.zoomwrap img{position:absolute;left:0;top:0;transform-origin:0 0;display:block}
+.zoomwrap .hint2{position:absolute;right:6px;bottom:4px;font-size:11px;color:#6a5a9a}
+@media(max-width:860px){.fa{grid-template-columns:1fr}.fap{flex-direction:row;flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -313,6 +359,7 @@ const S = {
   screen: '', key: '', tries: 0, pingT: null, tab: 'presets',
   ready: false, input: null, draw: null, deadline: null, totalMs: 0, warned: false, lastSec: -1,
   rv: { seq: -1, step: 1, timer: null, book: -1 }, albumSet: { auto: true, flow: 'start' },
+  vc: [], vcTotal: 0, pitems: [], strokes: [], role: null, tm: null, turnReady: false, zoomCrop: null,
 };
 if (!Number.isInteger(S.avatar)) S.avatar = Math.floor(Math.random() * NAV);
 
@@ -340,7 +387,7 @@ const send = (o) => { if (S.ws && S.ws.readyState === 1) S.ws.send(JSON.stringif
 
 function connect(room, create) {
   S.room = room; S.create = create; S.joined = false; S.fatal = false; S.tries = 0;
-  S.st = null; S.turn = null; S.books = {}; S.rv = { seq: -1, step: 1, timer: null, book: -1 };
+  S.st = null; S.turn = null; S.books = {}; S.rv = { seq: -1, step: 1, timer: null, book: -1 }; resetModeData();
   mount(h('div', { class: 'pg' }, h('div', { class: 'spin' }), h('div', { class: 'hint' }, 'Connecting…')));
   openSocket();
 }
@@ -397,24 +444,40 @@ function onMsg(m) {
     case 'turn': S.turn = m; route(); break;
     case 'timeup': if (S.screen === 'turn') { forceSend(); } break;
     case 'book': S.books[m.index] = m; if (S.screen === 'wait') route(); break;
+    case 'role': S.role = m; if (S.screen === 'fa') updateFA(); break;
+    case 'stroke': if (S.st && S.st.game && S.st.game.gid === m.gid) { S.strokes[m.i] = m; drawStrokes(); } break;
+    case 'strokes': S.strokes = m.list.slice(); drawStrokes(); break;
+    case 'vcase': S.vc[m.index] = m; S.vcTotal = m.total; if (S.screen === 'wait') route(); break;
+    case 'pitem': if (!S.pitems.some((x) => x.round === m.round && x.id === m.id)) S.pitems.push(m); if (S.screen === 'wait') route(); else if (S.screen === 'pv') updatePanic(); break;
   }
 }
 
 /* ------------------------------------------------------------ router */
+function resetModeData() { S.vc = []; S.vcTotal = 0; S.pitems = []; S.strokes = []; S.role = null; S.faVote = null; clearInterval(S.tm); }
 function route() {
   const st = S.st; if (!st) return;
+  const g = st.game, mode = g ? g.mode : null;
   if (st.phase === 'lobby') {
-    S.turn = null; S.books = {}; clearTimeout(S.rv.timer); S.rv = { seq: -1, step: 1, timer: null, book: -1 };
+    S.turn = null; S.books = {}; clearTimeout(S.rv.timer); S.rv = { seq: -1, step: 1, timer: null, book: -1 }; resetModeData();
     if (S.screen !== 'lobby') buildLobby();
     updateLobby();
   } else if (st.phase === 'play') {
-    const g = st.game;
+    if (mode === 'fakeartist') { const key = 'fa' + g.gid; if (S.key !== key) buildFA(key); updateFA(); return; }
+    if (mode === 'forgery' && g.round === 2) {
+      if (!S.vcTotal || S.vc.filter(Boolean).length < S.vcTotal) { if (S.key !== 'wait') buildWait('Loading the drawings…'); return; }
+      const key = 'fv' + g.gid; if (S.key !== key) buildFV(key); updateFV(); return;
+    }
+    if (mode === 'panic' && g.phase !== 'draw') {
+      if (panicItems().length < g.order.length) { if (S.key !== 'wait') buildWait('Loading the drawings…'); return; }
+      const key = 'pv' + g.gid + g.round; if (S.key !== key) buildPanic(key); updatePanic(); return;
+    }
     if (S.turn && g && S.turn.gid === g.gid && S.turn.round === g.round) {
       const key = 'turn' + g.gid + g.round;
       if (S.key !== key) buildTurn();
       updateTurn();
     } else if (S.key !== 'wait') buildWait('This room is currently in a game…');
   } else if (st.phase === 'results') {
+    if (st.final) return buildFinal();
     const ready = Object.keys(S.books).length >= st.game.books;
     if (!ready) { if (S.key !== 'wait') buildWait('Loading the albums…'); }
     else {
@@ -520,20 +583,22 @@ function updateLobby() {
     p.id === S.me ? h('span', { class: 'you' }, 'YOU') : null, p.id === st.hostId ? crown() : null,
     isHost && p.id !== S.me ? h('button', { class: 'x', title: 'Kick', onclick: () => modal('Kick the player out?', 'Are you sure you want to kick the player out?', [['Yes', () => send({ t: 'kick', id: p.id })], ['No', null]]) }, '✕') : null)));
   L.tabs.forEach((b, i) => b.classList.toggle('on', (i === 0) === (S.tab === 'presets')));
-  const set = st.settings, mins = estMinutes(n, set.speed, set.turns);
+  const set = st.settings, mode = set.mode || 'normal', mi = modeInfo(mode), mins = estFor(mode, n, set);
   const est = h('div', { class: 'hint', style: { marginTop: '4px' } }, 'ESTIMATED DURATION: ', h('b', {}, mins == null ? 'UNDEFINED' : mins === 1 ? '1 MINUTE' : mins + ' MINUTES'));
   if (S.tab === 'presets') {
     L.cfg.replaceChildren(
-      h('div', { class: 'mode' }, h('div', { class: 'ic' }, '📞'), h('div', {}, h('h4', { class: 'glow' }, 'NORMAL'), h('p', {}, 'The basis of it all! Write and draw alternately until you reach the last turn'))),
-      h('div', { class: 'hint', style: { margin: '10px 0' } }, 'More modes are not included in this version.'), est);
+      h('div', { class: 'modes' }, MODE_INFO.map((m) => h('button', { class: 'mcard' + (m.id === mode ? ' sel' : '') + (isHost ? ' click' : ''), disabled: false, onclick: () => isHost && send({ t: 'settings', mode: m.id }) },
+        h('div', { class: 'ic' }, m.ic), h('div', {}, h('h4', { class: m.id === mode ? 'glow' : '' }, m.name), h('p', {}, m.desc))))),
+      h('div', { class: 'hint', style: { marginTop: '8px' } }, isHost ? 'Pick a mode — you are the host.' : 'The host picks the mode.'), est);
   } else {
-    L.cfg.replaceChildren(
-      h('div', { class: 'opt' }, h('h5', {}, 'TIME'), seg([['slow', 'SLOW'], ['normal', 'NORMAL'], ['fast', 'FAST'], ['infinite', 'INFINITE']], set.speed, isHost, (k) => send({ t: 'settings', speed: k })),
-        h('p', {}, 'Normal: 50s to write, 150s to draw, 40s to describe. Slow doubles it, fast halves it.')),
-      h('div', { class: 'opt' }, h('h5', {}, 'TURNS'), seg([['few', 'FEW'], ['most', 'MOST'], ['all', 'ALL']], set.turns, isHost, (k) => send({ t: 'settings', turns: k })),
-        h('p', {}, 'Choose how many turns the players will play in order to create an album')),
-      h('div', { class: 'opt' }, h('h5', {}, 'TASK FLOW'), h('div', { class: 'seg' }, h('button', { class: 'on', disabled: true }, 'WRITING, DRAWING'))),
-      est);
+    const opts = [];
+    if (mi.chain || mi.speed) opts.push(h('div', { class: 'opt' }, h('h5', {}, 'TIME'), seg([['slow', 'SLOW'], ['normal', 'NORMAL'], ['fast', 'FAST'], ['infinite', 'INFINITE']], set.speed, isHost, (k) => send({ t: 'settings', speed: k })),
+      h('p', {}, mode === 'forgery' ? 'Normal: 60s to draw, 5s peek + 45s to copy, 50s to vote.' : 'Normal: 50s to write, 150s to draw, 40s to describe. Slow doubles it, fast halves it.')));
+    if (mi.chain) opts.push(h('div', { class: 'opt' }, h('h5', {}, 'TURNS'), seg([['few', 'FEW'], ['most', 'MOST'], ['all', 'ALL']], set.turns, isHost, (k) => send({ t: 'settings', turns: k })),
+      h('p', {}, 'Choose how many turns the players will play in order to create an album')));
+    if (!opts.length) opts.push(h('div', { class: 'opt' }, h('h5', {}, mi.name), h('p', {}, mode === 'panic' ? 'Fixed rules: 30-second drawings, 30-second votes, 3 rounds, 100 points per vote.' : 'Fixed rules: 5 seconds per line, 2 laps per vote, 3 votes max, 15 seconds for the Impostor to guess.')));
+    opts.push(h('div', { class: 'opt' }, h('h5', {}, 'MODE'), h('div', { class: 'seg' }, h('button', { class: 'on', disabled: true }, mi.name))));
+    L.cfg.replaceChildren(...opts, est);
   }
   const ok = st.players.filter((p) => p.connected).length >= st.min;
   const startGame = () => (n < 4
@@ -571,63 +636,104 @@ function bookShell(title, sub, coreEl, coreCls) {
     h('div', { class: 'core ' + (coreCls || ''), style: { backgroundImage: coreCls === 'text' ? 'none' : `url(${ASSETS.watermark})` } }, coreEl));
 }
 
-function buildTurn() {
-  const t = S.turn, st = S.st;
-  S.screen = 'turn'; S.key = 'turn' + t.gid + t.round;
-  S.ready = !!t.submitted; S.input = null; S.draw = null; S.warned = false; S.lastSec = -1;
-  S.totalMs = t.duration || 0;
-  const lead = t.remaining != null ? Math.max(0, t.remaining - t.duration) : 0;
+async function buildTurn() {
+  const t = S.turn;
+  const key = 'turn' + t.gid + t.round;
+  S.screen = 'turn'; S.key = key; S.turnReady = false;
+  S.ready = !!t.submitted; S.input = null; S.draw = null; S.warned = false; S.lastSec = -1; S.zoomCrop = null;
+  const mode = t.mode || 'normal', p = t.prompt;
+  S.totalMs = (t.duration || 0) + (t.peek || 0);
+  const lead = t.remaining != null ? Math.max(0, t.remaining - S.totalMs) : 0;
   S.deadline = t.remaining != null ? performance.now() + t.remaining : null;
   S.startAt = S.deadline != null ? S.deadline - S.totalMs : null;
-  bg(t.type === 'start' ? BG.start : t.type === 'draw' ? BG.draw : BG.write);
+  bg(t.type === 'start' ? BG.start : t.type === 'write' ? BG.write : BG.draw);
+  const isDraw = ['draw', 'forge1', 'forge2', 'panic'].includes(t.type);
 
-  T = { clock: h('canvas', { width: 120, height: 120 }), secs: h('b', {}), dones: h('div', { class: 'dones' }), btn: null };
-  const clockBox = h('div', { class: 'clock' }, T.clock, T.secs);
-  const stepBox = h('div', { class: 'stepbox outline' }, 'TURN', h('b', {}, `${t.round + 1}/${t.total}`));
-  let book, extra = null;
+  // prepare mode-specific artwork before building the screen
+  let baseImg = null, ref = null, crop = null;
+  if (t.type === 'draw' && p && p.kind === 'image') {
+    if (mode === 'pixel') ref = await pixelate(p.content, t.pix || 256);
+    else if (mode === 'zoom') crop = await pickCrop(p.content);
+    else if (mode === 'evolution') baseImg = await loadImg(p.content);
+  }
+  if (S.key !== key) return;
+
+  T = { clock: h('canvas', { width: 120, height: 120 }), dones: h('div', { class: 'dones' }), btn: null };
+  const clockBox = h('div', { class: 'clock' }, T.clock);
+  const stepBox = h('div', { class: 'stepbox outline' }, mode === 'panic' ? 'ROUND' : 'TURN', h('b', {}, `${t.round + 1}/${t.total}`));
+  const onEnter = (e) => { if (e.key === 'Enter') { e.preventDefault(); toggleReady(); } };
+  let book, extra = null, refEl = null;
 
   if (t.type === 'start') {
     const sug = randSentence();
     S.input = h('textarea', { class: 'txt-w', maxlength: 60, rows: 2, placeholder: sug, autocomplete: 'off' });
     S.input.dataset.sug = sug;
-    S.input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); toggleReady(); } });
+    S.input.addEventListener('keydown', onEnter);
+    T.cnt = h('span', { class: 'cnt' }, '0/60');
     S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/60'; });
+    book = bookShell(mode === 'story' ? 'START A STORY' : mode === 'pixel' || mode === 'zoom' || mode === 'evolution' ? 'WRITE A PROMPT TO DRAW' : 'WRITE A SENTENCE',
+      h('h3', {}, mode === 'story' ? 'Write the opening sentence of a story...' : 'Start writing a story...'), h('div', {}, S.input, T.cnt), 'text');
+  } else if (t.type === 'write' && p && p.kind === 'text') {          // Story mode: continue the previous sentence
+    S.input = h('textarea', { class: 'txt-w', maxlength: 60, rows: 2, placeholder: 'Write the next sentence of the story...', autocomplete: 'off' });
+    S.input.addEventListener('keydown', onEnter);
     T.cnt = h('span', { class: 'cnt' }, '0/60');
-    book = bookShell('WRITE A SENTENCE', h('h3', {}, 'Start writing a story...'), h('div', {}, S.input, T.cnt), 'text');
-  } else if (t.type === 'write') {
-    S.input = h('textarea', { class: 'txt-w', maxlength: 60, rows: 2, placeholder: 'Type your description for this scene here...', autocomplete: 'off' });
-    S.input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); toggleReady(); } });
     S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/60'; syncBtn(); });
+    book = bookShell('CONTINUE THE STORY', h('h3', {}, '“' + p.content + '”'), h('div', {}, S.input, T.cnt), 'text');
+  } else if (t.type === 'write') {                                      // describe a drawing
+    S.input = h('textarea', { class: 'txt-w', maxlength: 60, rows: 2, placeholder: 'Type your description for this scene here...', autocomplete: 'off' });
+    S.input.addEventListener('keydown', onEnter);
     T.cnt = h('span', { class: 'cnt' }, '0/60');
-    const p = t.prompt;
+    S.input.addEventListener('input', () => { T.cnt.textContent = S.input.value.length + '/60'; syncBtn(); });
     const pic = p && p.kind === 'image' ? h('img', { class: 'pic', src: p.content, alt: 'drawing' }) : h('div', { class: 'pic', style: { display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontStyle: 'italic' } }, '(no drawing)');
     book = bookShell('NOW IT\'S YOUR TURN TO DESCRIBE THIS SCENE', h('h3', {}), h('div', {}, pic), '');
     book.classList.add('tall');
     const below = h('div', { class: 'core text', style: { margin: '0 6px 25px', backgroundImage: 'none', boxShadow: 'none' } }, S.input, T.cnt);
     book.querySelector('.core').after(below);
     book.querySelector('.core').style.margin = '0 6px 10px';
-  } else {
-    const p = t.prompt;
-    S.draw = makeDrawing();
-    book = bookShell('HEY, IT\'S TIME TO DRAW!', h('h3', {}, p && p.kind === 'text' ? p.content : '(nothing was written — draw anything!)'), S.draw.canvas, '');
+  } else {                                                             // any drawing turn
+    let title = 'HEY, IT\'S TIME TO DRAW!', sub = h('h3', {}, p && p.kind === 'text' ? p.content : '(nothing was written — draw anything!)');
+    if (t.type === 'forge1') sub = h('h3', {}, p.content);
+    else if (t.type === 'forge2') { title = 'REDRAW IT FROM MEMORY!'; sub = h('h3', {}, 'Make your best fake copy of the drawing you just peeked at'); }
+    else if (t.type === 'panic') { title = '30-SECOND PANIC!'; sub = h('h3', {}, p.content); }
+    else if (ref) { title = 'REDRAW WHAT YOU THINK THIS IS'; sub = h('h3', {}, 'The picture was pixelated — draw it again on a fresh canvas'); }
+    else if (mode === 'zoom' && crop) { title = 'EXPAND THE SCENE!'; sub = h('h3', {}, 'Draw the whole scene around the locked square'); }
+    else if (mode === 'zoom' && p && p.kind === 'empty') sub = h('h3', {}, '(no drawing came through — draw anything!)');
+    else if (mode === 'evolution' && t.mut) { title = 'EVOLVE THE DRAWING!'; sub = h('h3', {}, '🧬 ' + t.mut); }
+    S.draw = makeDrawing({ base: baseImg, baseSrc: baseImg ? p.content : '', crop });
+    S.zoomCrop = crop;
+    book = bookShell(title, sub, S.draw.canvas, '');
     extra = S.draw;
+    if (ref) refEl = h('div', { class: 'refbox' }, h('b', {}, 'WHAT THE LAST PLAYER DREW (PIXELATED)'), h('img', { src: ref, alt: 'pixelated drawing' }));
+    if (t.type === 'forge2') {                                          // 5-second peek, then hide
+      const left = Math.max(0, (t.peek || 5000) - (S.totalMs - (t.remaining != null ? t.remaining : S.totalMs)));
+      if (p && p.kind === 'image' && left > 150 && !t.submitted) {
+        const num = h('b', {}, Math.ceil(left / 1000));
+        const pk = h('div', { class: 'peek' }, h('img', { src: p.content, alt: '' }), num);
+        book.querySelector('.core').append(pk);
+        S.draw.lock(true);
+        const h4 = book.querySelector('.bhead h4'); h4.textContent = 'MEMORIZE THIS DRAWING!';
+        const t0 = performance.now(), iv = setInterval(() => {
+          const rem = left - (performance.now() - t0);
+          if (S.key !== key) return clearInterval(iv);
+          if (rem <= 0) { clearInterval(iv); pk.remove(); h4.textContent = 'REDRAW IT FROM MEMORY!'; S.draw.lock(S.ready); play('timeout', 0.5); } else num.textContent = Math.ceil(rem / 1000);
+        }, 100);
+      }
+    }
   }
 
   T.btn = h('button', { class: 'btn', style: { fontSize: '22px', minWidth: '170px' }, onclick: toggleReady }, 'DONE!');
   const bottom = h('div', { class: 'bar-btm' }, T.btn);
-  let main;
-  if (extra) {
-    main = h('div', { class: 'drawrow' }, extra.colors, h('div', { class: 'dropt' }, book, extra.opts), extra.tools);
-  } else main = h('div', {}, book);
-  const hostSkip = h('div', { id: 'skipbox' });
-  T.skip = hostSkip;
+  const main = extra ? h('div', { class: 'drawrow' }, extra.colors, h('div', { class: 'dropt' }, refEl, book, extra.opts), extra.tools) : h('div', {}, book);
+  T.skip = h('div', { id: 'skipbox' });
   mount(h('div', { class: 'pg' }, h('div', { class: 'game' },
-    h('div', { class: 'stage3' }, h('div', { class: 'side' }, clockBox, stepBox), main), bottom, hostSkip, T.dones)));
+    h('div', { class: 'stage3' }, h('div', { class: 'side' }, clockBox, stepBox), main), bottom, T.skip, T.dones)));
+  S.turnReady = true;
   syncBtn();
   if (S.ready) lockInputs(true);
   if (t.round === 0 && lead > 100 && !t.submitted) countdown(Math.round(lead / 1000));
-  else play('yourTurn', 0.7);
+  else if (t.type !== 'forge2') play('yourTurn', 0.7);
   if (S.input) setTimeout(() => S.input.focus(), 50);
+  updateTurn();
 }
 
 function countdown(sec) {
@@ -640,28 +746,30 @@ function countdown(sec) {
   }, 1000);
 }
 
+const DRAW_TYPES = ['draw', 'forge1', 'forge2', 'panic'];
 function syncBtn() {
-  if (!T.btn) return;
-  const t = S.turn;
+  if (!T.btn || !S.turn) return;
+  const t = S.turn, d = DRAW_TYPES.includes(t.type);
   if (t.type === 'write') T.btn.disabled = !S.ready && !S.input.value.trim();
-  T.btn.textContent = t.type === 'draw' ? 'DONE!' : S.ready ? 'EDIT' : 'DONE!';
-  if (t.type === 'draw' && S.ready) T.btn.disabled = true;
+  T.btn.textContent = d ? 'DONE!' : S.ready ? 'EDIT' : 'DONE!';
+  if (d && S.ready) T.btn.disabled = true;
 }
 function lockInputs(on) {
   if (S.input) S.input.disabled = on;
   if (S.draw) S.draw.lock(on);
 }
-function currentContent(final) {
+function currentContent() {
   const t = S.turn;
-  if (t.type === 'draw') return S.draw.export();
+  if (DRAW_TYPES.includes(t.type)) return S.draw.export();
   let v = (S.input.value || '').trim();
   if (!v && t.type === 'start') v = S.input.dataset.sug;
   return v;
 }
 function toggleReady() {
-  const t = S.turn; if (!t || S.screen !== 'turn') return;
-  if (t.type === 'draw') {
+  const t = S.turn; if (!t || S.screen !== 'turn' || !S.turnReady) return;
+  if (DRAW_TYPES.includes(t.type)) {
     if (S.ready) return;
+    if (t.type === 'panic') return doSend();
     modal('SEND DRAWING', 'Ready to send your drawing? You cannot edit it after sending.', [['Yes', () => { doSend(); }], ['No', null]]);
     return;
   }
@@ -670,13 +778,13 @@ function toggleReady() {
   doSend();
 }
 function doSend() {
-  const t = S.turn; S.ready = true;
-  send({ t: 'submit', round: t.round, content: currentContent() });
+  const t = S.turn; if (S.ready) return; S.ready = true;
+  const c = S.zoomCrop;
+  send({ t: 'submit', round: t.round, content: currentContent(), meta: c ? { crop: { x: c.x, y: c.y, s: c.s } } : undefined });
   lockInputs(true); syncBtn();
 }
 function forceSend() {            // clock ran out: send whatever is there
-  const t = S.turn; if (!t || S.screen !== 'turn') return;
-  if (S.ready) return;
+  const t = S.turn; if (!t || S.screen !== 'turn' || !S.turnReady || S.ready) return;
   document.getElementById('modal').classList.remove('on');
   doSend();
 }
@@ -684,7 +792,7 @@ function forceSend() {            // clock ran out: send whatever is there
 function updateTurn() {
   const st = S.st; if (!T.dones) return;
   T.dones.replaceChildren(...st.players.map((p) => h('div', { title: p.name }, avatar(p.avatar, 40, { done: p.done, off: !p.connected }))));
-  if (st.settings.speed === 'infinite' && st.hostId === S.me) {
+  if (st.settings.speed === 'infinite' && st.hostId === S.me && !['panic', 'fakeartist'].includes(st.game.mode)) {
     T.skip.replaceChildren(h('button', { class: 'btn small', onclick: () => send({ t: 'skip' }) }, 'Skip waiting'));
   } else T.skip.replaceChildren();
 }
@@ -711,11 +819,18 @@ setInterval(() => {
 }, 150);
 
 /* ----------------------------------------------------------- drawing */
-function makeDrawing() {
+function makeDrawing(cfg = {}) {
   const W = CANVAS_W, H = CANVAS_H;
   const cv = h('canvas', { width: W, height: H, class: 'cv' });
   const ctx = cv.getContext('2d', { willReadFrequently: true });
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  if (cfg.base) ctx.drawImage(cfg.base, 0, 0, W, H);          // Evolution: previous drawing is the editable base layer (undo never goes below it)
+  let wrap = cv;
+  if (cfg.crop) {                                                // Zoom Out: locked square on its own layer, can't be drawn over or erased
+    const ov = h('canvas', { width: W, height: H, class: 'ov' }), o = ov.getContext('2d');
+    o.drawImage(cfg.crop.cv, cfg.crop.x, cfg.crop.y); o.setLineDash([6, 4]); o.lineWidth = 2; o.strokeStyle = '#d12a5a'; o.strokeRect(cfg.crop.x + 1, cfg.crop.y + 1, cfg.crop.s - 2, cfg.crop.s - 2);
+    wrap = h('div', { class: 'cwrap' }, cv, ov);
+  }
   let tool = 'pencil', color = '#000000', size = 6, alpha = 1, drawing = false, touched = false, locked = false, base = null, sx = 0, sy = 0, path = [];
   const undo = [], redo = [];
   const sizes = [2, 6, 12, 22, 36];
@@ -808,13 +923,15 @@ function makeDrawing() {
   opts.append(h('span', { style: { opacity: .8, fontSize: '12px' } }, 'OPACITY'), rng);
 
   return {
-    canvas: cv, colors, tools, opts,
+    canvas: wrap, colors, tools, opts,
     lock(on) { locked = on; cv.style.cursor = on ? 'default' : 'crosshair'; cv.style.opacity = on ? '.85' : '1'; },
     export() {
       document.removeEventListener('keydown', onKey);
-      if (!touched) return '';
-      let d = cv.toDataURL('image/png');
-      if (d.length > 700000) d = cv.toDataURL('image/jpeg', 0.7);
+      let src = cv;
+      if (cfg.crop) { src = document.createElement('canvas'); src.width = W; src.height = H; const c2 = src.getContext('2d'); c2.drawImage(cv, 0, 0); c2.drawImage(cfg.crop.cv, cfg.crop.x, cfg.crop.y); }
+      else if (!touched) return cfg.baseSrc || '';
+      let d = src.toDataURL('image/png');
+      if (d.length > 700000) d = src.toDataURL('image/jpeg', 0.7);
       return d;
     },
   };
@@ -833,7 +950,7 @@ const playerOf = (id) => (S.st && S.st.players.find((p) => p.id === id)) || { na
 
 function order(book, flow) {
   const T = S.st.game.total, idx = [...Array(T).keys()];
-  return flow === 'end' ? idx.reverse() : idx;
+  return flow === 'end' && S.st.game.mode !== 'story' ? idx.reverse() : idx;
 }
 function itemEl(e, i) {
   const p = playerOf(e.by);
@@ -888,7 +1005,7 @@ function updateAlbums() {
 
   // timeline
   if (A.shownSeq !== v.seq || A.shownBook !== v.book || step < A.rendered) { A.tl.replaceChildren(); A.rendered = 0; A.shownSeq = v.seq; A.shownBook = v.book; play('turn', 0.8); }
-  for (let k = A.rendered; k < step; k++) { const ei = seq[k]; A.tl.append(itemEl(b.entries[ei], ei)); }
+  for (let k = A.rendered; k < step; k++) { const ei = seq[k]; appendEntry(b, ei); }
   if (step > A.rendered) { A.rendered = step; A.tl.querySelector('.endcard')?.remove(); }
   const done = step >= Tn;
   A.tl.querySelector('.endcard')?.remove();
@@ -909,6 +1026,298 @@ function updateAlbums() {
                         : h('div', { class: 'hint', style: { alignSelf: 'center' } }, 'WAITING FOR THE HOST TO PROCEED'));
   }
 }
+
+/* ======================================================================
+   MODE HELPERS + SCREENS (forgery, fake artist, panic, final scoreboards)
+   ====================================================================== */
+const MODE_INFO = [
+  { id: 'normal', name: 'NORMAL', ic: '📞', desc: 'The basis of it all! Write and draw alternately until you reach the last turn', chain: true },
+  { id: 'story', name: 'STORY', ic: '📖', desc: 'Pure writing: continue the story one sentence at a time, seeing only the sentence right before yours', chain: true },
+  { id: 'forgery', name: 'FORGERY', ic: '🕵️', desc: 'Draw a secret prompt, copy another drawing from a 5-second peek, then vote for the real original', speed: true },
+  { id: 'pixel', name: 'PIXEL DECAY', ic: '👾', desc: 'Draw only. Every pass halves the resolution and you redraw the blocky mess', chain: true },
+  { id: 'zoom', name: 'ZOOM OUT', ic: '🔍', desc: 'You only see a small square of the last drawing. Draw the whole scene around it', chain: true },
+  { id: 'evolution', name: 'EVOLUTION', ic: '🧬', desc: 'Edit the previous drawing directly, guided by a random mutation prompt', chain: true },
+  { id: 'fakeartist', name: 'FAKE ARTIST', ic: '🎭', desc: 'One shared canvas, one line per turn. Find the Impostor who doesn\'t know the word' },
+  { id: 'panic', name: '30-SECOND PANIC', ic: '⏱️', desc: 'Everyone draws the same absurd prompt in 30 seconds, then votes. 3 quick rounds' },
+];
+const modeInfo = (id) => MODE_INFO.find((m) => m.id === id) || MODE_INFO[0];
+function estFor(mode, n, set) {
+  const m = SPEEDS[set.speed], T = turnCount(Math.max(n, 2), set.turns);
+  if (mode === 'panic') return 4;
+  if (mode === 'fakeartist') return Math.max(1, Math.round((12 * Math.max(n, 3) + 30) * 1.5 / 60));
+  if (!m) return null;
+  if (mode === 'forgery') return Math.max(1, Math.round((60 + 5 + 45 + 50) * m / 60));
+  let s = 0;
+  for (let t = 0; t < T; t++) s += t === 0 ? BASE.start : mode === 'story' ? BASE.write : mode === 'normal' ? (t % 2 ? BASE.draw : BASE.write) : BASE.draw;
+  return Math.max(1, Math.round(s * m / 60));
+}
+
+const loadImg = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+/* Pixel Decay: shrink to `res` pixels wide (averaged), then scale back up with smoothing OFF so the pixels stay sharp */
+async function pixelate(src, res) {
+  const img = await loadImg(src); if (!img) return src;
+  const w = Math.max(2, res), hh = Math.max(2, Math.round(res * CANVAS_H / CANVAS_W));
+  const a = document.createElement('canvas'); a.width = w; a.height = hh;
+  const x = a.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, hh); x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, w, hh);
+  const b = document.createElement('canvas'); b.width = CANVAS_W; b.height = CANVAS_H;
+  const y = b.getContext('2d'); y.imageSmoothingEnabled = false; y.drawImage(a, 0, 0, CANVAS_W, CANVAS_H);
+  return b.toDataURL('image/png');
+}
+/* Zoom Out: random square (side = 18% of the width) that is guaranteed to land on actual ink, never a blank white corner */
+async function pickCrop(src) {
+  const img = await loadImg(src), s = Math.round(CANVAS_W * 0.18);
+  const cv = document.createElement('canvas'); cv.width = CANVAS_W; cv.height = CANVAS_H;
+  const c = cv.getContext('2d', { willReadFrequently: true }); c.fillStyle = '#fff'; c.fillRect(0, 0, CANVAS_W, CANVAS_H);
+  if (img) c.drawImage(img, 0, 0, CANVAS_W, CANVAS_H);
+  const d = c.getImageData(0, 0, CANVAS_W, CANVAS_H).data;
+  const ink = (x, y) => { let n = 0, t = 0; for (let j = 0; j < s; j += 3) for (let i = 0; i < s; i += 3) { const k = ((y + j) * CANVAS_W + x + i) * 4; t++; if (d[k] < 240 || d[k + 1] < 240 || d[k + 2] < 240) n++; } return n / t; };
+  let best = null; const good = [];
+  for (let k = 0; k < 120; k++) {
+    const x = Math.floor(Math.random() * (CANVAS_W - s)), y = Math.floor(Math.random() * (CANVAS_H - s)), r = ink(x, y);
+    if (!best || r > best.r) best = { x, y, r }; if (r >= 0.15) good.push({ x, y, r });
+  }
+  const at = good.length ? good[Math.floor(Math.random() * good.length)] : (best && best.r > 0 ? best : { x: Math.round((CANVAS_W - s) / 2), y: Math.round((CANVAS_H - s) / 2) });
+  const out = document.createElement('canvas'); out.width = s; out.height = s;
+  out.getContext('2d').drawImage(cv, at.x, at.y, s, s, 0, 0, s, s);
+  return { x: at.x, y: at.y, s, cv: out };
+}
+
+const sortedScores = (scores) => Object.entries(scores).sort((a, b) => b[1] - a[1]);
+function scoreboard(scores, extra) {
+  const rows = sortedScores(scores), top = rows.length ? rows[0][1] : 0;
+  return h('div', { class: 'score' }, rows.map(([id, pts], i) => {
+    const p = playerOf(id);
+    return h('div', { class: 'srow' + (pts === top && top > 0 ? ' top' : '') }, h('span', { class: 'rk' }, i + 1), avatar(p.avatar, 40, { off: !p.connected }), h('span', { class: 'nm' }, p.name), extra ? h('span', { style: { opacity: .8, fontSize: '14px' } }, extra[id] != null ? '+' + extra[id] : '') : null, h('span', { class: 'pt' }, pts));
+  }));
+}
+function remainingTimer(el, get) {      // small countdown bar/number bound to a deadline
+  clearInterval(S.tm);
+  S.tm = setInterval(() => { const r = get(); if (r == null) return; el.textContent = Math.max(0, Math.ceil((r - performance.now()) / 1000)) + 's'; }, 250);
+}
+
+/* ------------------------------------------------------------ FORGERY */
+let FV = {};
+function buildFV(key) {
+  S.screen = 'fv'; S.key = key; bg(BG.write); S.fvPick = {};
+  FV = { list: h('div', { class: 'panelw' }), t: h('b', {}), btn: null };
+  FV.btn = h('button', { class: 'btn', style: { fontSize: '22px' }, onclick: () => { send({ t: 'vote', votes: S.fvPick }); S.fvSent = true; toast('Votes sent! You can still change them until time is up.'); updateFV(); } }, 'SEND VOTES');
+  mount(h('div', { class: 'pg' }, h('div', { class: 'panelw' },
+    h('div', { class: 'logo glow', style: { fontSize: '26px', textAlign: 'center' } }, 'WHICH DRAWING IS THE REAL ORIGINAL?'),
+    h('div', { class: 'hint' }, 'Every case has the real drawing and a copy made from memory. Vote on each one. TIME LEFT: ', FV.t), FV.list, FV.btn, h('div', { class: 'dones', id: 'fvd' }))));
+  S.fvDeadline = null; remainingTimer(FV.t, () => S.fvDeadline);
+  S.fvSent = false; S.fvBuilt = false;
+  play('yourTurn', 0.6);
+}
+function updateFV() {
+  const st = S.st, g = st.game; if (S.screen !== 'fv') return;
+  if (g.remaining != null && S.fvDlRound !== 'x' + g.gid + ':' + g.remaining) { S.fvDeadline = performance.now() + g.remaining; S.fvDlRound = 'x' + g.gid + ':' + g.remaining; }
+  if (!S.fvBuilt) {
+    S.fvBuilt = true;
+    FV.list.replaceChildren(...S.vc.map((c, i) => h('div', { class: 'card2 vcase' },
+      h('div', { class: 'pr' }, h('span', { style: { opacity: .75 } }, 'PROMPT: '), h('b', {}, c.prompt)),
+      c.mine ? h('div', { class: 'hint' }, 'This case involves you — you sit this one out.') : null,
+      h('div', { class: 'pair' }, c.items.map((img, pos) => h('button', { class: 'vopt', disabled: c.mine, 'data-case': i, 'data-pos': pos, onclick: () => { S.fvPick[i] = pos; S.fvSent = false; refreshPicks(); updateFV(); } },
+        img ? h('img', { src: img, alt: 'drawing ' + (pos + 1) }) : h('div', { class: 'none' }, '(no drawing)')))))));
+  }
+  function refreshPicks() { FV.list.querySelectorAll('.vopt').forEach((b) => b.classList.toggle('sel', S.fvPick[b.dataset.case] === Number(b.dataset.pos))); }
+  refreshPicks();
+  const need = S.vc.filter((c) => !c.mine).length, have = Object.keys(S.fvPick).length;
+  FV.btn.textContent = S.fvSent ? 'VOTES SENT ✓ (tap to change)' : `SEND VOTES (${have}/${need})`;
+  FV.btn.disabled = have === 0;
+  const d = document.getElementById('fvd'); if (d) d.replaceChildren(...st.players.map((p) => h('div', { title: p.name }, avatar(p.avatar, 36, { done: p.done, off: !p.connected }))));
+}
+
+function buildForgeryFinal() {
+  const st = S.st, f = st.final; S.screen = 'final'; S.key = 'final' + st.game.gid; bg(BG.book);
+  const cases = f.cases.map((c, i) => {
+    const vc = S.vc[i], o = playerOf(c.owner), k = playerOf(c.copier);
+    const fooled = c.votes.filter((v) => v.pos !== c.real).length, found = c.votes.length - fooled;
+    return h('div', { class: 'card2 vcase' },
+      h('div', { class: 'pr' }, h('span', { style: { opacity: .75 } }, 'PROMPT: '), h('b', {}, c.prompt), h('span', { style: { opacity: .8, fontSize: '14px' } }, `  — found by ${found}, fooled ${fooled}`)),
+      h('div', { class: 'pair' }, (vc ? vc.items : ['', '']).map((img, pos) => h('div', { class: 'vopt ' + (pos === c.real ? 'real' : 'fake'), style: { cursor: 'default' } },
+        h('span', { class: 'tag' }, pos === c.real ? `✔ REAL — ${o.name}` : `✘ FAKE — ${k.name}`),
+        img ? h('img', { src: img, alt: '' }) : h('div', { class: 'none' }, '(no drawing)')))));
+  });
+  mount(h('div', { class: 'pg' }, h('div', { class: 'panelw' },
+    h('div', { class: 'logo glow', style: { fontSize: '30px' } }, 'FORGERY RESULTS'), scoreboard(f.scores), ...cases, newTurnBtn())));
+}
+function newTurnBtn() {
+  return S.st.hostId === S.me ? h('button', { class: 'btn', style: { fontSize: '22px' }, onclick: () => send({ t: 'again' }) }, h('i', { class: 'play-ico' }), 'NEW TURN')
+    : h('div', { class: 'hint' }, 'WAITING FOR THE HOST TO START A NEW TURN');
+}
+
+/* -------------------------------------------------------- FAKE ARTIST */
+let F = {};
+function buildFA(key) {
+  S.screen = 'fa'; S.key = key; bg(BG.draw);
+  F = { cv: h('canvas', { width: CANVAS_W, height: CANVAS_H, class: 'cv' }), role: h('div', { class: 'farole' }), info: h('div', { class: 'hint' }), box: h('div', { class: 'fabox' }), side: h('div', { class: 'fap' }),
+    pts: [], drawing: false, sent: false, turnKey: '', pkey: '', deadline: null, total: 5000, vote: null };
+  const pos = (e) => { const r = F.cv.getBoundingClientRect(); return [(e.clientX - r.left) * CANVAS_W / r.width, (e.clientY - r.top) * CANVAS_H / r.height]; };
+  const myTurn = () => { const g = S.st && S.st.game; return g && g.phase === 'draw' && g.cur === S.me && !F.sent; };
+  F.cv.addEventListener('pointerdown', (e) => { if (!myTurn() || e.button > 0) return; e.preventDefault(); F.cv.setPointerCapture(e.pointerId); F.drawing = true; F.pts = [pos(e)]; drawStrokes(); });
+  F.cv.addEventListener('pointermove', (e) => { if (!F.drawing) return; e.preventDefault(); const p = pos(e), l = F.pts[F.pts.length - 1]; if (Math.hypot(p[0] - l[0], p[1] - l[1]) >= 2) { F.pts.push(p); drawStrokes(); } });
+  const up = () => { if (F.drawing) finishStroke(); };
+  F.cv.addEventListener('pointerup', up); F.cv.addEventListener('pointercancel', up);
+  F.finish = finishStroke;
+  mount(h('div', { class: 'pg' }, h('div', { class: 'panelw' }, F.role, h('div', { class: 'fa' },
+    h('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } },
+      h('div', { class: 'book', style: { '--w': '100%', marginTop: '0' } }, h('div', { class: 'core', style: { margin: '4px 4px 20px' } }, F.cv)), F.info, F.box), F.side))));
+  clearInterval(S.tm); S.tm = setInterval(faTick, 120);
+  drawStrokes();
+}
+function finishStroke() {
+  if (!F.drawing || F.sent) return; F.drawing = false; F.sent = true;
+  let pts = F.pts; if (pts.length > 600) { const k = Math.ceil(pts.length / 600); pts = pts.filter((_, i) => i % k === 0 || i === pts.length - 1); }
+  send({ t: 'stroke', pts: pts.map((p) => [Math.round(p[0]), Math.round(p[1])]) }); F.pts = []; drawStrokes();
+}
+function drawStrokes() {
+  if (S.screen !== 'fa' || !F.cv) return;
+  const ctx = F.cv.getContext('2d'), g = S.st && S.st.game; if (!g) return;
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5;
+  const line = (pts, color) => { ctx.strokeStyle = ctx.fillStyle = color; ctx.beginPath(); if (pts.length === 1) { ctx.arc(pts[0][0], pts[0][1], 2.5, 0, 7); ctx.fill(); return; } ctx.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke(); };
+  for (const s of S.strokes) if (s) line(s.pts, g.colors[s.by] || '#000');
+  if (F.pts.length) line(F.pts, g.colors[S.me] || '#000');
+}
+function faTick() {
+  if (S.screen !== 'fa') return;
+  const bar = F.box.querySelector('.bar i'); if (!bar || F.deadline == null) return;
+  const rem = Math.max(0, F.deadline - performance.now());
+  bar.style.width = Math.min(100, rem / F.total * 100) + '%';
+  const g = S.st.game;
+  if (g.phase === 'draw' && g.cur === S.me && F.drawing && rem <= 120) finishStroke();
+}
+function updateFA() {
+  const st = S.st, g = st.game; if (S.screen !== 'fa' || !g) return;
+  const names = (id) => playerOf(id).name, n = g.order.length;
+  const tk = g.phase + ':' + g.vr + ':' + g.step;
+  if (tk !== F.turnKey) { F.turnKey = tk; F.sent = false; F.drawing = false; F.pts = []; F.deadline = g.remaining != null ? performance.now() + g.remaining : null; F.total = g.phase === 'draw' ? 5000 : g.phase === 'vote' ? 30000 : g.phase === 'guess' ? 15000 : 4000; if (g.phase === 'draw' && g.cur === S.me) play('yourTurn', 0.7); }
+  const r = S.role;
+  F.role.replaceChildren(...(r ? (r.word ? [h('span', {}, 'SECRET WORD: ', h('b', { class: 'glow' }, r.word)), h('small', {}, `Category: ${r.cat} — don't make it too obvious, the Impostor is watching!`)]
+    : [h('span', {}, 'CATEGORY: ', h('b', { class: 'glow' }, r.cat)), h('small', {}, 'YOU ARE THE IMPOSTOR — you don\'t know the word. Blend in!')]) : [h('span', {}, 'Waiting for your role…')]));
+  const lap = Math.min(2, Math.floor(g.step / n) + 1);
+  F.info.textContent = g.phase === 'draw' ? `LAP ${lap}/2 · VOTE ROUND ${g.vr + 1}/3 · ONE continuous line per turn` : `VOTE ROUND ${g.vr + 1}/3`;
+  F.side.replaceChildren(...g.order.map((id) => { const p = playerOf(id); return h('div', { class: 'pi' + (g.cur === id ? ' cur' : '') }, h('i', { class: 'dot', style: { background: g.colors[id] } }), avatar(p.avatar, 32, { off: !p.connected }), h('span', { class: 'pn' }, p.name + (id === S.me ? ' (you)' : ''))); }));
+  const myTurn = g.phase === 'draw' && g.cur === S.me;
+  F.cv.style.cursor = myTurn && !F.sent ? 'crosshair' : 'default'; F.cv.style.outline = myTurn ? '4px solid ' + (g.colors[S.me]) : 'none';
+  const pk = tk + ':' + (S.faVote || '') + ':' + st.players.map((p) => (p.done ? 1 : 0)).join('');
+  if (pk === F.pkey) return; F.pkey = pk;
+  const bar = h('div', { class: 'bar' }, h('i'));
+  if (g.phase === 'draw') F.box.replaceChildren(h('div', { class: 'bigmsg' }, myTurn ? 'YOUR TURN — draw ONE line!' : `${names(g.cur)} is drawing…`), bar);
+  else if (g.phase === 'vote') {
+    F.box.replaceChildren(h('div', { class: 'bigmsg' }, 'WHO IS THE IMPOSTOR?'), bar, h('div', { class: 'vgrid' }, g.order.filter((id) => id !== S.me).map((id) => { const p = playerOf(id);
+      return h('button', { class: 'btn small' + (S.faVote === id ? ' sel' : ''), onclick: () => { S.faVote = id; send({ t: 'vote', for: id }); updateFA(); } }, h('i', { class: 'dot', style: { width: '14px', height: '14px', borderRadius: '50%', background: g.colors[id], border: '2px solid #fff' } }), p.name); })),
+      h('div', { class: 'hint' }, S.faVote ? `You voted for ${names(S.faVote)}. You can change your vote until time is up.` : 'Nobody is ever kicked out — it is just a vote.'));
+  } else if (g.phase === 'msg') F.box.replaceChildren(h('div', { class: 'bigmsg' }, g.msg), h('div', { class: 'hint' }, g.vr + 1 >= 3 ? 'That was the last vote…' : 'Everybody stays in — two more laps on the same canvas!'), bar);
+  else if (g.phase === 'guess') {
+    if (g.caught === S.me) {
+      const inp = h('input', { class: 'txt', maxlength: 40, placeholder: 'What was the secret word?' });
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { send({ t: 'guess', word: inp.value }); inp.disabled = true; } });
+      F.box.replaceChildren(h('div', { class: 'bigmsg' }, 'YOU WERE CAUGHT! Guess the secret word'), bar, inp, h('button', { class: 'btn', onclick: () => { send({ t: 'guess', word: inp.value }); inp.disabled = true; } }, 'GUESS'));
+      setTimeout(() => inp.focus(), 50);
+    } else F.box.replaceChildren(h('div', { class: 'bigmsg' }, `${names(g.caught)} was the Impostor!`), h('div', { class: 'hint' }, 'They have 15 seconds to guess the secret word and steal the win…'), bar);
+  }
+  if (g.phase !== 'vote') S.faVote = null;
+}
+function buildFAFinal() {
+  const st = S.st, f = st.final; S.screen = 'final'; S.key = 'final' + st.game.gid; bg(BG.book); clearInterval(S.tm);
+  const cv = h('canvas', { width: CANVAS_W, height: CANVAS_H, class: 'cv', style: { cursor: 'default' } });
+  const c = cv.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, CANVAS_W, CANVAS_H); c.lineCap = 'round'; c.lineJoin = 'round'; c.lineWidth = 5;
+  for (const s of S.strokes) if (s) { c.strokeStyle = st.game.colors[s.by] || '#000'; c.beginPath(); c.moveTo(s.pts[0][0], s.pts[0][1]); for (const p of s.pts) c.lineTo(p[0], p[1]); c.stroke(); }
+  const imp = playerOf(f.imp);
+  mount(h('div', { class: 'pg' }, h('div', { class: 'panelw' },
+    h('div', { class: 'logo glow', style: { fontSize: '30px', textAlign: 'center' } }, f.winner === 'impostor' ? 'THE IMPOSTOR WINS!' : 'THE ARTISTS WIN!'),
+    h('div', { class: 'card2', style: { textAlign: 'center' } }, h('div', { class: 'bigmsg' }, f.text),
+      h('div', { style: { marginTop: '8px' } }, 'The secret word was ', h('b', { class: 'glow' }, f.word), ` (${f.cat})`),
+      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', marginTop: '8px' } }, 'The Impostor was ', avatar(imp.avatar, 36), h('b', {}, imp.name)),
+      f.guess ? h('div', { class: 'hint', style: { marginTop: '6px' } }, `Their guess: “${f.guess}”`) : null),
+    h('div', { class: 'book', style: { '--w': 'min(760px,100%)', marginTop: '0' } }, h('div', { class: 'core', style: { margin: '4px 4px 20px' } }, cv)), newTurnBtn())));
+}
+
+/* ------------------------------------------------------ 30-SECOND PANIC */
+let PV = {};
+function panicItems() { const g = S.st.game; return S.pitems.filter((x) => x.round === g.round); }
+function buildPanic(key) {
+  S.screen = 'pv'; S.key = key; bg(BG.write); S.pvVote = null; S.pvBuilt = ''; clearInterval(S.tm);
+  PV = { title: h('div', { class: 'logo glow', style: { fontSize: '26px', textAlign: 'center' } }), t: h('b'), grid: h('div', { class: 'pgrid' }), foot: h('div', { class: 'col' }) };
+  mount(h('div', { class: 'pg' }, h('div', { class: 'panelw' }, PV.title, h('div', { class: 'hint' }, 'TIME LEFT: ', PV.t), PV.grid, PV.foot)));
+  S.pvDeadline = null; remainingTimer(PV.t, () => S.pvDeadline);
+}
+function updatePanic() {
+  const st = S.st, g = st.game; if (S.screen !== 'pv') return;
+  const dlKey = g.phase + g.round + ':' + g.remaining; if (S.pvDlKey !== dlKey) { S.pvDlKey = dlKey; S.pvDeadline = g.remaining != null ? performance.now() + g.remaining : null; }
+  const items = panicItems(), result = g.phase === 'result';
+  PV.title.textContent = result ? `ROUND ${g.round + 1} RESULTS — “${g.prompt}”` : `VOTE FOR YOUR FAVORITE! — “${g.prompt}”`;
+  const bkey = g.phase + ':' + g.round + ':' + (S.pvVote || '') + ':' + items.length + (result ? JSON.stringify(g.last.counts) : '');
+  if (bkey !== S.pvBuilt) {
+    S.pvBuilt = bkey;
+    PV.grid.replaceChildren(...items.map((it) => {
+      const p = playerOf(it.id), mine = it.id === S.me, cnt = result ? g.last.counts[it.id] : null;
+      return h('div', { class: 'pcard' + (mine ? ' mine' : '') },
+        h('div', { class: 'img' }, it.img ? h('img', { src: it.img, alt: '' }) : h('div', { class: 'none', style: { aspectRatio: '758/424', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' } }, '(no drawing)')),
+        result ? h('div', { class: 'row', style: { display: 'flex', gap: '8px', alignItems: 'center' } }, avatar(p.avatar, 30), h('b', {}, p.name), h('span', { class: 'glow' }, `${cnt} vote${cnt === 1 ? '' : 's'} (+${cnt * 100})`))
+          : h('button', { class: 'btn small vb' + (S.pvVote === it.id ? ' sel' : ''), disabled: mine, onclick: () => { S.pvVote = it.id; send({ t: 'vote', for: it.id }); updatePanic(); } }, mine ? 'YOUR DRAWING' : S.pvVote === it.id ? '✓ VOTED' : 'VOTE'));
+    }));
+  }
+  PV.foot.replaceChildren(...(result ? [scoreboard(g.scores, g.last.counts && Object.fromEntries(Object.entries(g.last.counts).map(([k, v]) => [k, v * 100]))), h('div', { class: 'hint' }, g.round + 1 >= 3 ? 'Final scores coming up…' : 'Next round starting soon…')]
+    : [h('div', { class: 'dones' }, ...st.players.map((p) => h('div', { title: p.name }, avatar(p.avatar, 36, { done: p.done, off: !p.connected }))))]));
+}
+function buildPanicFinal() {
+  const st = S.st, f = st.final; S.screen = 'final'; S.key = 'final' + st.game.gid; bg(BG.book);
+  const rows = sortedScores(f.scores), w = playerOf(rows[0][0]);
+  mount(h('div', { class: 'pg' }, h('div', { class: 'panelw' },
+    h('div', { class: 'logo glow', style: { fontSize: '32px', textAlign: 'center' } }, '30-SECOND PANIC — FINAL SCOREBOARD'),
+    h('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } }, avatar(w.avatar, 80), h('div', { class: 'bigmsg' }, '🏆 ' + w.name + ' wins!')),
+    scoreboard(f.scores), newTurnBtn())));
+}
+function buildFinal() {
+  const st = S.st, f = st.final;
+  if (f.mode === 'forgery') {
+    if (S.vc.filter(Boolean).length < f.cases.length) { if (S.key !== 'wait') buildWait('Loading the drawings…'); return; }
+    if (S.key !== 'final' + st.game.gid) buildForgeryFinal();
+  } else if (f.mode === 'fakeartist') { if (S.key !== 'final' + st.game.gid) buildFAFinal(); }
+  else if (f.mode === 'panic') { if (S.key !== 'final' + st.game.gid) buildPanicFinal(); }
+}
+
+/* ------------------------------------------------------ album extras (reveal) */
+function appendEntry(b, ei) {
+  const e = b.entries[ei], mode = S.st.game.mode;
+  if (mode === 'story') {
+    let card = A.tl.querySelector('.storycard');
+    if (!card) { card = h('div', { class: 'storycard' }); A.tl.append(card); }
+    const p = playerOf(e.by);
+    card.append(h('span', {}, h('i', { class: 'au', title: p.name, style: { backgroundImage: `url(${ASSETS.avatars[p.avatar % NAV]})` } }), e.skipped ? '(…) ' : e.content + ' '));
+    return;
+  }
+  if (mode === 'zoom' && e.kind === 'draw' && e.meta && e.meta.crop && !e.skipped) { A.tl.append(zoomItem(e, ei)); return; }
+  const el = itemEl(e, ei);
+  if (mode === 'evolution' && e.meta && e.meta.mut) el.prepend(h('div', { class: 'mut' }, '🧬 ' + e.meta.mut));
+  A.tl.append(el);
+  if (mode === 'pixel' && e.kind === 'draw' && !e.skipped && ei < b.entries.length - 1) {          // show what the next player actually saw
+    const res = Math.max(8, 256 >> (ei - 1)), img = h('img', { alt: 'pixelated', style: { imageRendering: 'pixelated' } });
+    pixelate(e.content, res).then((u) => { img.src = u; });
+    A.tl.append(h('div', { class: 'item' }, h('div', { class: 'pixrow' }, `👾 PASSED ON AT ${res}px — this is what the next player saw`), h('div', { class: 'dr' }, img)));
+  }
+}
+function zoomItem(e, i) {
+  const p = playerOf(e.by), c = e.meta.crop, W = CANVAS_W, H = CANVAS_H;
+  const box = h('div', { class: 'zoomwrap' }), img = h('img', { src: e.content, alt: 'drawing' });
+  box.append(img, h('span', { class: 'hint2' }, 'tap to replay'));
+  const run = () => {
+    const bw = box.clientWidth || 560, k = bw / W, K0 = H / c.s, cx = c.x + c.s / 2, cy = c.y + c.s / 2, t0 = performance.now(), dur = 2600;
+    img.style.width = W * k + 'px';
+    const frame = (now) => {
+      let u = Math.min(1, (now - t0) / dur); const q = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+      const kk = K0 + (1 - K0) * q, px = (bw / 2) * (1 - q) + cx * k * q, py = (bw * H / W / 2) * (1 - q) + cy * k * q;
+      img.style.transform = `translate(${px - cx * k * kk}px,${py - cy * k * kk}px) scale(${kk})`;
+      if (u < 1) requestAnimationFrame(frame); else img.style.transform = 'none';
+    };
+    img.style.transform = `scale(${K0})`; requestAnimationFrame(frame);
+  };
+  box.addEventListener('click', run);
+  requestAnimationFrame(() => setTimeout(run, 250));
+  return h('div', { class: 'item' }, h('div', { class: 'by' }, avatar(p.avatar, 30), p.name, ' ', h('span', { style: { opacity: .7, fontWeight: 700 } }, 'expanded the square 🔍')), box);
+}
+
 
 /* ------------------------------------------------------------- boot */
 goHome();
